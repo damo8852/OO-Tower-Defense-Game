@@ -1,11 +1,12 @@
 package com.towerdefense.model.tower;
 
+import java.util.List;
+
 import com.towerdefense.model.Cell;
-import com.towerdefense.model.Enemy;
 import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
+import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.pattern.strategy.NearestEnemyStrategy;
-import java.util.List;
 
 public class BasicTower extends Tower {
 
@@ -17,7 +18,7 @@ public class BasicTower extends Tower {
     }
 
     @Override
-    public void attack(List<Enemy> enemies) {
+    public void attack(List<IEnemy> enemies) {
         attackSingleTarget(enemies);
     }
 

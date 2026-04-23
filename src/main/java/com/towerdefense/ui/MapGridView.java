@@ -1,16 +1,19 @@
 package com.towerdefense.ui;
 
+import java.util.Map;
+
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.Cell;
-import com.towerdefense.model.Enemy;
-import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
 import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
+import com.towerdefense.model.GameMap;
+import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.pattern.command.CommandHistory;
 import com.towerdefense.pattern.command.PlaceTowerCommand;
 import com.towerdefense.pattern.command.SellTowerCommand;
 import com.towerdefense.pattern.command.UpgradeTowerCommand;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
@@ -18,7 +21,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import java.util.Map;
 
 public class MapGridView extends Canvas {
 
@@ -134,7 +136,7 @@ public class MapGridView extends Canvas {
         engine.getActiveEnemies().forEach(e -> drawEnemy(gc, e));
     }
 
-    private void drawEnemy(GraphicsContext gc, Enemy e) {
+    private void drawEnemy(GraphicsContext gc, IEnemy e) {
         Cell pos = e.getPosition();
         double x = pos.getCol() * TILE_SIZE;
         double y = pos.getRow() * TILE_SIZE;

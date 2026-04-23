@@ -1,13 +1,14 @@
 package com.towerdefense.engine;
 
-import com.towerdefense.model.Enemy;
-import com.towerdefense.model.GameMap;
-import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
-import com.towerdefense.pattern.factory.WaveSpawner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import com.towerdefense.model.GameMap;
+import com.towerdefense.model.GameState;
+import com.towerdefense.model.Tower;
+import com.towerdefense.model.enemy.IEnemy;
+import com.towerdefense.pattern.factory.WaveSpawner;
 
 public class GameEngine {
 
@@ -15,7 +16,7 @@ public class GameEngine {
     private final GameState gameState;
     private final WaveSpawner waveSpawner;
     private final List<Tower> towers;
-    private List<Enemy> activeEnemies;
+    private List<IEnemy> activeEnemies;
 
     public GameEngine(GameMap map, GameState gameState, WaveSpawner waveSpawner) {
         this.map = map;
@@ -31,38 +32,38 @@ public class GameEngine {
     }
 
     public void tick() {
-        List<Enemy> inPlay = getEnemiesInPlay();
+        List<IEnemy> inPlay = getEnemiesInPlay();
         moveEnemies(inPlay);
         processEscapes(inPlay);
         processCombat(inPlay);
         cleanupDefeatedEnemies();
     }
 
-    private List<Enemy> getEnemiesInPlay() {
+    private List<IEnemy> getEnemiesInPlay() {
         return activeEnemies.stream()
                 .filter(e -> e.isAlive() && !e.hasReachedEnd())
                 .toList();
     }
 
-    private void moveEnemies(List<Enemy> enemies) {
-        enemies.forEach(Enemy::move);
+    private void moveEnemies(List<IEnemy> enemies) {
+        enemies.forEach(IEnemy::move);
     }
 
-    private void processEscapes(List<Enemy> enemies) {
+    private void processEscapes(List<IEnemy> enemies) {
         enemies.stream()
-                .filter(Enemy::hasReachedEnd)
+                .filter(IEnemy::hasReachedEnd)
                 .forEach(e -> gameState.loseLife());
     }
 
-    private void processCombat(List<Enemy> inPlay) {
-        List<Enemy> targetable = inPlay.stream()
+    private void processCombat(List<IEnemy> inPlay) {
+        List<IEnemy> targetable = inPlay.stream()
                 .filter(e -> !e.hasReachedEnd())
                 .toList();
         towers.forEach(t -> t.attack(targetable));
         rewardKills(targetable);
     }
 
-    private void rewardKills(List<Enemy> targetable) {
+    private void rewardKills(List<IEnemy> targetable) {
         targetable.stream()
                 .filter(e -> !e.isAlive())
                 .forEach(e -> {
@@ -99,7 +100,7 @@ public class GameEngine {
                 .findFirst();
     }
 
-    public List<Enemy> getActiveEnemies() { return List.copyOf(activeEnemies); }
+    public List<IEnemy> getActiveEnemies() { return List.copyOf(activeEnemies); }
     public List<Tower> getTowers()        { return List.copyOf(towers); }
     public GameState getGameState()       { return gameState; }
     public GameMap getMap()               { return map; }

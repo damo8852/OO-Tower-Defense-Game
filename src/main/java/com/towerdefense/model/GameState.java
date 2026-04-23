@@ -38,9 +38,9 @@ public class GameState {
         observers.forEach(o -> o.onLivesChanged(lives));
     }
 
-    public void addScore(int points) {
-        score += points;
-        observers.forEach(o -> o.onScoreChanged(score));
+    public void addScore(int score) {
+        this.score += score;
+        observers.forEach(o -> o.onScoreChanged(this.score));
     }
 
     public void nextWave() {
@@ -48,14 +48,14 @@ public class GameState {
         observers.forEach(o -> o.onWaveChanged(wave));
     }
 
-    public void addGold(int amount) {
-        gold += amount;
-        observers.forEach(o -> o.onGoldChanged(gold));
+    public void addGold(int gold) {
+        this.gold += gold;
+        observers.forEach(o -> o.onGoldChanged(this.gold));
     }
 
-    public void spendGold(int amount) {
-        gold -= amount;
-        observers.forEach(o -> o.onGoldChanged(gold));
+    public void spendGold(int gold) {
+        this.gold -= gold;
+        observers.forEach(o -> o.onGoldChanged(this.gold));
     }
 
     public boolean isGameOver() { return lives <= 0; }

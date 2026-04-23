@@ -1,7 +1,9 @@
 package com.towerdefense.model;
 
-import com.towerdefense.pattern.strategy.TargetingStrategy;
 import java.util.List;
+
+import com.towerdefense.model.enemy.IEnemy;
+import com.towerdefense.pattern.strategy.TargetingStrategy;
 
 public abstract class Tower {
 
@@ -21,21 +23,21 @@ public abstract class Tower {
         this.cost = cost;
     }
 
-    public abstract void attack(List<Enemy> enemies);
+    public abstract void attack(List<IEnemy> enemies);
     public abstract TowerType getTowerType();
 
-    protected void attackSingleTarget(List<Enemy> enemies) {
-        Enemy target = selectTarget(enemies);
+    protected void attackSingleTarget(List<IEnemy> enemies) {
+        IEnemy target = selectTarget(enemies);
         if (target != null) {
             target.takeDamage(damage);
         }
     }
 
-    private Enemy selectTarget(List<Enemy> enemies) {
+    private IEnemy selectTarget(List<IEnemy> enemies) {
         return targetingStrategy.select(enemiesInRange(enemies), position);
     }
 
-    protected List<Enemy> enemiesInRange(List<Enemy> enemies) {
+    protected List<IEnemy> enemiesInRange(List<IEnemy> enemies) {
         return enemies.stream()
                 .filter(e -> e.isAlive() && !e.hasReachedEnd() && position.distanceTo(e.getPosition()) <= range)
                 .toList();

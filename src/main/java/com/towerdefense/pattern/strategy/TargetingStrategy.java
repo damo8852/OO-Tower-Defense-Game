@@ -1,9 +1,11 @@
 package com.towerdefense.pattern.strategy;
 
+import java.util.List;
+
 import com.towerdefense.model.Cell;
-import com.towerdefense.model.Enemy;
+import com.towerdefense.model.enemy.IEnemy;
 import java.util.List;
 
 public interface TargetingStrategy {
-    Enemy select(List<Enemy> inRange, Cell towerPosition);
+    IEnemy select(List<IEnemy> inRange, Cell towerPosition);
 }
