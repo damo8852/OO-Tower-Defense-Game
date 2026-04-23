@@ -14,8 +14,14 @@ public class Cell {
         this.type = type;
     }
 
+    public double distanceTo(Cell other) {
+        int dr = this.row - other.row;
+        int dc = this.col - other.col;
+        return Math.sqrt(dr * dr + dc * dc);
+    }
+
     public int getRow() { return row; }
     public int getCol() { return col; }
     public Type getType() { return type; }
-    public void setType(Type type) { this.type = type; }
+    void setType(Type type) { this.type = type; }
 }

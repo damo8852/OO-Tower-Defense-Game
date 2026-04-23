@@ -5,11 +5,13 @@ import java.util.List;
 
 public abstract class Tower {
 
-    protected final Cell position;
-    protected final TargetingStrategy targetingStrategy;
-    protected int range;
-    protected int damage;
-    protected final int cost;
+    private static final int SELL_VALUE_DIVISOR = 2;
+
+    private final Cell position;
+    private final TargetingStrategy targetingStrategy;
+    private int range;
+    private int damage;
+    private final int cost;
 
     protected Tower(Cell position, TargetingStrategy targetingStrategy, int range, int damage, int cost) {
         this.position = position;
@@ -20,22 +22,38 @@ public abstract class Tower {
     }
 
     public abstract void attack(List<Enemy> enemies);
+    public abstract TowerType getTowerType();
+
+    protected void attackSingleTarget(List<Enemy> enemies) {
+        Enemy target = selectTarget(enemies);
+        if (target != null) {
+            target.takeDamage(damage);
+        }
+    }
+
+    private Enemy selectTarget(List<Enemy> enemies) {
+        return targetingStrategy.select(enemiesInRange(enemies), position);
+    }
 
     protected List<Enemy> enemiesInRange(List<Enemy> enemies) {
         return enemies.stream()
-                .filter(e -> e.isAlive() && distanceTo(e) <= range)
+                .filter(e -> e.isAlive() && !e.hasReachedEnd() && position.distanceTo(e.getPosition()) <= range)
                 .toList();
     }
 
-    private double distanceTo(Enemy enemy) {
-        int dr = enemy.getPosition().getRow() - position.getRow();
-        int dc = enemy.getPosition().getCol() - position.getCol();
-        return Math.sqrt(dr * dr + dc * dc);
+    public void upgrade(int damageIncrease, int rangeIncrease) {
+        damage += damageIncrease;
+        range += rangeIncrease;
+    }
+
+    public void downgrade(int damageDecrease, int rangeDecrease) {
+        damage -= damageDecrease;
+        range -= rangeDecrease;
     }
 
     public Cell getPosition() { return position; }
-    public int getRange() { return range; }
-    public int getDamage() { return damage; }
-    public int getCost() { return cost; }
-    public int getSellValue() { return cost / 2; }
+    public int getRange()     { return range; }
+    public int getDamage()    { return damage; }
+    public int getCost()      { return cost; }
+    public int getSellValue() { return cost / SELL_VALUE_DIVISOR; }
 }

@@ -1,0 +1,12 @@
+{
+  "lives": 4,
+  "score": 70,
+  "wave": 2,
+  "gold": 20,
+  "commands": [
+    {"type":"PLACE","tower":"SNIPER","row":2,"col":7},
+    {"type":"PLACE","tower":"SPLASH","row":1,"col":8},
+    {"type":"PLACE","tower":"BASIC","row":4,"col":8},
+    {"type":"PLACE","tower":"BASIC","row":1,"col":7}
+  ]
+}
