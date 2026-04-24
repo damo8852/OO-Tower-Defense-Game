@@ -1,11 +1,9 @@
 package com.towerdefense.ui;
 
 import com.towerdefense.model.Tile;
-import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
-import com.towerdefense.model.tower.BasicTower;
-import com.towerdefense.model.tower.SniperTower;
-import com.towerdefense.model.tower.SplashTower;
+import com.towerdefense.model.tower.Tower;
+import com.towerdefense.model.tower.TowerFactory;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -40,10 +38,6 @@ public class TowerSelectionPanel extends VBox {
     public Tower createTower(Tile cell) {
         if (group.getSelectedToggle() == null) return null;
         TowerType type = typeMap.get((ToggleButton) group.getSelectedToggle());
-        return switch (type) {
-            case BASIC  -> new BasicTower(cell);
-            case SNIPER -> new SniperTower(cell);
-            case SPLASH -> new SplashTower(cell);
-        };
+        return TowerFactory.forType(type).create(cell);
     }
 }

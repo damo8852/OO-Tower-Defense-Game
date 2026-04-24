@@ -3,7 +3,6 @@ package com.towerdefense.model.tower;
 import java.util.List;
 
 import com.towerdefense.model.Tile;
-import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
 import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.strategy.FirstInPathStrategy;

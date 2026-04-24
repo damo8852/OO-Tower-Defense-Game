@@ -3,7 +3,7 @@ package com.towerdefense;
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
+import com.towerdefense.model.tower.Tower;
 import com.towerdefense.model.tower.BasicTower;
 import com.towerdefense.model.tower.SniperTower;
 import com.towerdefense.command.*;

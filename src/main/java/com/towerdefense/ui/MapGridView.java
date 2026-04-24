@@ -5,7 +5,7 @@ import java.util.Map;
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.Tile;
 import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
+import com.towerdefense.model.tower.Tower;
 import com.towerdefense.model.TowerType;
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.enemy.IEnemy;

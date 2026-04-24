@@ -1,11 +1,12 @@
-package com.towerdefense.model;
+package com.towerdefense.model.tower;
 
-import java.util.List;
-
+import com.towerdefense.model.Tile;
 import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.strategy.TargetingStrategy;
 
-public abstract class Tower {
+import java.util.List;
+
+public abstract class Tower implements ITower {
 
     private static final int SELL_VALUE_DIVISOR = 2;
 
@@ -23,18 +24,11 @@ public abstract class Tower {
         this.cost = cost;
     }
 
-    public abstract void attack(List<IEnemy> enemies);
-    public abstract TowerType getTowerType();
-
     protected void attackSingleTarget(List<IEnemy> enemies) {
-        IEnemy target = selectTarget(enemies);
+        IEnemy target = targetingStrategy.select(enemiesInRange(enemies), position);
         if (target != null) {
             target.takeDamage(damage);
         }
-    }
-
-    private IEnemy selectTarget(List<IEnemy> enemies) {
-        return targetingStrategy.select(enemiesInRange(enemies), position);
     }
 
     protected List<IEnemy> enemiesInRange(List<IEnemy> enemies) {
@@ -43,19 +37,21 @@ public abstract class Tower {
                 .toList();
     }
 
+    @Override
     public void upgrade(int damageIncrease, int rangeIncrease) {
         damage += damageIncrease;
         range += rangeIncrease;
     }
 
+    @Override
     public void downgrade(int damageDecrease, int rangeDecrease) {
         damage -= damageDecrease;
         range -= rangeDecrease;
     }
 
-    public Tile getPosition() { return position; }
-    public int getRange()     { return range; }
-    public int getDamage()    { return damage; }
-    public int getCost()      { return cost; }
-    public int getSellValue() { return cost / SELL_VALUE_DIVISOR; }
+    @Override public Tile getPosition() { return position; }
+    @Override public int getRange()     { return range; }
+    @Override public int getDamage()    { return damage; }
+    @Override public int getCost()      { return cost; }
+    @Override public int getSellValue() { return cost / SELL_VALUE_DIVISOR; }
 }

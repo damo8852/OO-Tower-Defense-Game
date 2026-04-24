@@ -2,7 +2,7 @@ package com.towerdefense.command;
 
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
+import com.towerdefense.model.tower.Tower;
 
 public class SellTowerCommand implements GameCommand {
 

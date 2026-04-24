@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
+import com.towerdefense.model.tower.Tower;
 import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.model.enemy.WaveSpawner;
 

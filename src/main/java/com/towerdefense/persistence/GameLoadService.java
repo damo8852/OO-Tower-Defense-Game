@@ -3,11 +3,9 @@ package com.towerdefense.persistence;
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.Tile;
 import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
-import com.towerdefense.model.tower.BasicTower;
-import com.towerdefense.model.tower.SniperTower;
-import com.towerdefense.model.tower.SplashTower;
+import com.towerdefense.model.tower.Tower;
+import com.towerdefense.model.tower.TowerFactory;
 import com.towerdefense.command.CommandHistory;
 import com.towerdefense.command.CommandRecord;
 import com.towerdefense.command.PlaceTowerCommand;
@@ -53,11 +51,7 @@ public class GameLoadService {
     }
 
     private Tower createTower(TowerType type, Tile cell) {
-        return switch (type) {
-            case BASIC  -> new BasicTower(cell);
-            case SNIPER -> new SniperTower(cell);
-            case SPLASH -> new SplashTower(cell);
-        };
+        return TowerFactory.forType(type).create(cell);
     }
 
     private List<CommandRecord> parseCommands(String json) {
