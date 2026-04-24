@@ -3,12 +3,10 @@ package com.towerdefense.app;
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
-import com.towerdefense.pattern.command.CommandHistory;
-import com.towerdefense.pattern.command.UpgradeTowerCommand;
-import com.towerdefense.pattern.factory.ArmoredEnemyFactory;
-import com.towerdefense.pattern.factory.BasicEnemyFactory;
-import com.towerdefense.pattern.factory.FastEnemyFactory;
-import com.towerdefense.pattern.factory.WaveSpawner;
+import com.towerdefense.command.CommandHistory;
+import com.towerdefense.command.UpgradeTowerCommand;
+import com.towerdefense.model.enemy.EnemyFactory;
+import com.towerdefense.model.enemy.WaveSpawner;
 import com.towerdefense.persistence.GameLoadService;
 import com.towerdefense.persistence.GameSaveService;
 import com.towerdefense.ui.HudView;
@@ -17,6 +15,7 @@ import com.towerdefense.ui.TowerSelectionPanel;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -24,6 +23,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -33,9 +33,9 @@ public class TowerDefenseApp extends Application {
 
     private static final int    MAP_ROWS             = 10;
     private static final int    MAP_COLS             = 10;
-    private static final int    INITIAL_LIVES        = 10;
-    private static final int    INITIAL_GOLD         = 500;
-    private static final long   TICK_INTERVAL_NS     = 300_000_000L;
+    private static final int    DEFAULT_LIVES        = 10;
+    private static final int    DEFAULT_GOLD         = 500;
+    private static final long   TICK_INTERVAL_NS     = 600_000_000L;
     private static final String SAVE_FILE            = "save.json";
     private static final String WINDOW_TITLE         = "Tower Defense";
     private static final int    RIGHT_PANEL_SPACING  = 8;
@@ -52,6 +52,8 @@ public class TowerDefenseApp extends Application {
     private CommandHistory commandHistory;
     private MapGridView    mapGridView;
     private Label          statusLabel;
+    private Label          gameOverScoreLabel;
+    private VBox           gameOverOverlay;
     private boolean        waveRunning = false;
 
     @Override
@@ -66,27 +68,44 @@ public class TowerDefenseApp extends Application {
 
     private void buildDomain() {
         GameMap map = new GameMap(MAP_ROWS, MAP_COLS);
-        gameState = new GameState(INITIAL_LIVES, INITIAL_GOLD);
+        gameState = new GameState(DEFAULT_LIVES, DEFAULT_GOLD);
         WaveSpawner waveSpawner = new WaveSpawner(List.of(
-                new BasicEnemyFactory(), new FastEnemyFactory(), new ArmoredEnemyFactory()));
+                new EnemyFactory.Basic(), new EnemyFactory.Fast(), new EnemyFactory.Armored()));
         engine = new GameEngine(map, gameState, waveSpawner);
         commandHistory = new CommandHistory();
     }
 
     private HudView buildHud() {
-        HudView hud = new HudView(INITIAL_LIVES, 0, 0, INITIAL_GOLD);
-        gameState.addObserver(hud);
-        return hud;
+        return new HudView(DEFAULT_LIVES, 0, 0, DEFAULT_GOLD);
     }
 
     private void buildStage(Stage stage, HudView hudView, TowerSelectionPanel selectionPanel) {
         statusLabel = new Label("Press Start Wave to begin.");
         VBox rightPanel = buildRightPanel(hudView, selectionPanel);
-        HBox root = new HBox(mapGridView, rightPanel);
+        gameOverOverlay = buildGameOverOverlay();
+        StackPane root = new StackPane(new HBox(mapGridView, rightPanel), gameOverOverlay);
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.show();
+    }
+
+    private VBox buildGameOverOverlay() {
+        Label title = new Label("GAME OVER");
+        title.setStyle("-fx-font-size: 52; -fx-font-weight: bold; -fx-text-fill: white;");
+
+        gameOverScoreLabel = new Label();
+        gameOverScoreLabel.setStyle("-fx-font-size: 26; -fx-text-fill: white;");
+
+        Button newGameBtn = new Button("New Game");
+        newGameBtn.setStyle("-fx-font-size: 16;");
+        newGameBtn.setOnAction(e -> resetGame());
+
+        VBox overlay = new VBox(20, title, gameOverScoreLabel, newGameBtn);
+        overlay.setAlignment(Pos.CENTER);
+        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.72);");
+        overlay.setVisible(false);
+        return overlay;
     }
 
     private VBox buildRightPanel(HudView hudView, TowerSelectionPanel selectionPanel) {
@@ -134,12 +153,28 @@ public class TowerDefenseApp extends Application {
 
     private void checkWaveEnd() {
         if (gameState.isGameOver()) {
-            waveRunning = false;
-            statusLabel.setText("GAME OVER — final score: " + gameState.getScore());
+            showGameOver();
         } else if (engine.isWaveComplete()) {
             waveRunning = false;
             statusLabel.setText("Wave " + gameState.getWave() + " complete! Press Start Wave.");
         }
+    }
+
+    private void showGameOver() {
+        waveRunning = false;
+        statusLabel.setText("GAME OVER — final score: " + gameState.getScore());
+        gameOverScoreLabel.setText("Final Score: " + gameState.getScore());
+        gameOverOverlay.setVisible(true);
+    }
+
+    private void resetGame() {
+        waveRunning = false;
+        commandHistory.clear();
+        engine.clearTowers();
+        gameState.resetToInitial();
+        mapGridView.refresh();
+        statusLabel.setText("Press Start Wave to begin.");
+        gameOverOverlay.setVisible(false);
     }
 
     private void startWave() {

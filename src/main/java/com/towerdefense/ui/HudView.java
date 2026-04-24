@@ -1,11 +1,13 @@
 package com.towerdefense.ui;
 
-import com.towerdefense.pattern.observer.GameObserver;
+import com.towerdefense.eventbus.EventBus;
+import com.towerdefense.eventbus.EventType;
+import com.towerdefense.eventbus.ITowerDefenseObserver;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public class HudView extends VBox implements GameObserver {
+public class HudView extends VBox implements ITowerDefenseObserver {
 
     private static final int SPACING = 4;
 
@@ -22,10 +24,16 @@ public class HudView extends VBox implements GameObserver {
         waveLabel  = new Label("Wave:  " + wave);
         goldLabel  = new Label("Gold:  " + gold);
         getChildren().addAll(livesLabel, scoreLabel, waveLabel, goldLabel);
+        EventBus.getInstance().attach(this);
     }
 
-    @Override public void onLivesChanged(int v) { livesLabel.setText("Lives: " + v); }
-    @Override public void onScoreChanged(int v) { scoreLabel.setText("Score: " + v); }
-    @Override public void onWaveChanged(int v)  { waveLabel.setText("Wave:  " + v); }
-    @Override public void onGoldChanged(int v)  { goldLabel.setText("Gold:  " + v); }
+    @Override
+    public void update(EventType eventType, Object eventObject) {
+        switch (eventType) {
+            case LIVES_CHANGED -> livesLabel.setText("Lives: " + eventObject);
+            case SCORE_CHANGED -> scoreLabel.setText("Score: " + eventObject);
+            case WAVE_CHANGED  -> waveLabel.setText("Wave:  "  + eventObject);
+            case GOLD_CHANGED  -> goldLabel.setText("Gold:  "  + eventObject);
+        }
+    }
 }

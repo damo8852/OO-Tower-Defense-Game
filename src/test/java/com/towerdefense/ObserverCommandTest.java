@@ -3,13 +3,15 @@ package com.towerdefense;
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
+import com.towerdefense.model.tower.Tower;
 import com.towerdefense.model.tower.BasicTower;
 import com.towerdefense.model.tower.SniperTower;
-import com.towerdefense.pattern.command.*;
-import com.towerdefense.pattern.factory.BasicEnemyFactory;
-import com.towerdefense.pattern.factory.WaveSpawner;
-import com.towerdefense.pattern.observer.GameObserver;
+import com.towerdefense.command.*;
+import com.towerdefense.eventbus.EventBus;
+import com.towerdefense.eventbus.EventType;
+import com.towerdefense.eventbus.ITowerDefenseObserver;
+import com.towerdefense.model.enemy.EnemyFactory;
+import com.towerdefense.model.enemy.WaveSpawner;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,19 +29,18 @@ public class ObserverCommandTest {
 
     @Before
     public void setUp() {
+        EventBus.resetForTesting();
         map = new GameMap(5, 5);
         state = new GameState(20, 500);
-        WaveSpawner spawner = new WaveSpawner(List.of(new BasicEnemyFactory()));
+        WaveSpawner spawner = new WaveSpawner(List.of(new EnemyFactory.Basic()));
         engine = new GameEngine(map, state, spawner);
         history = new CommandHistory();
     }
 
-    // --- Observer tests ---
-
     @Test
     public void observer_notifiedOnLivesChange() {
         List<Integer> received = new ArrayList<>();
-        state.addObserver(observerWith(lives -> received.add(lives), s -> {}, w -> {}, g -> {}));
+        EventBus.getInstance().attach(eventObserver(EventType.LIVES_CHANGED, received));
 
         state.loseLife();
 
@@ -50,7 +51,7 @@ public class ObserverCommandTest {
     @Test
     public void observer_notifiedOnScoreChange() {
         List<Integer> received = new ArrayList<>();
-        state.addObserver(observerWith(l -> {}, score -> received.add(score), w -> {}, g -> {}));
+        EventBus.getInstance().attach(eventObserver(EventType.SCORE_CHANGED, received));
 
         state.addScore(50);
 
@@ -61,7 +62,7 @@ public class ObserverCommandTest {
     @Test
     public void observer_notifiedOnWaveChange() {
         List<Integer> received = new ArrayList<>();
-        state.addObserver(observerWith(l -> {}, s -> {}, wave -> received.add(wave), g -> {}));
+        EventBus.getInstance().attach(eventObserver(EventType.WAVE_CHANGED, received));
 
         state.nextWave();
         state.nextWave();
@@ -73,7 +74,7 @@ public class ObserverCommandTest {
     @Test
     public void observer_notifiedOnGoldChange() {
         List<Integer> received = new ArrayList<>();
-        state.addObserver(observerWith(l -> {}, s -> {}, w -> {}, gold -> received.add(gold)));
+        EventBus.getInstance().attach(eventObserver(EventType.GOLD_CHANGED, received));
 
         state.spendGold(100);
         state.addGold(50);
@@ -87,8 +88,8 @@ public class ObserverCommandTest {
     public void multipleObservers_allNotified() {
         List<Integer> a = new ArrayList<>();
         List<Integer> b = new ArrayList<>();
-        state.addObserver(observerWith(l -> {}, s -> {}, w -> {}, gold -> a.add(gold)));
-        state.addObserver(observerWith(l -> {}, s -> {}, w -> {}, gold -> b.add(gold)));
+        EventBus.getInstance().attach(eventObserver(EventType.GOLD_CHANGED, a));
+        EventBus.getInstance().attach(eventObserver(EventType.GOLD_CHANGED, b));
 
         state.addGold(10);
 
@@ -96,15 +97,13 @@ public class ObserverCommandTest {
         assertEquals(1, b.size());
     }
 
-    // --- Command tests ---
-
     @Test
     public void placeTower_execute_addsTowerAndDeductsGold() {
         Tower tower = new BasicTower(map.getCell(1, 0));
         history.execute(new PlaceTowerCommand(engine, state, tower));
 
         assertEquals(1, engine.getTowers().size());
-        assertEquals(400, state.getGold()); // 500 - 100
+        assertEquals(400, state.getGold());
     }
 
     @Test
@@ -121,12 +120,12 @@ public class ObserverCommandTest {
     public void sellTower_execute_removesTowerAndAddsGold() {
         Tower tower = new BasicTower(map.getCell(1, 0));
         engine.addTower(tower);
-        state.spendGold(tower.getCost()); // simulate prior purchase
+        state.spendGold(tower.getCost());
 
         history.execute(new SellTowerCommand(engine, state, tower));
 
         assertEquals(0, engine.getTowers().size());
-        assertEquals(450, state.getGold()); // (500 - 100) + 50 sell value
+        assertEquals(450, state.getGold());
     }
 
     @Test
@@ -139,33 +138,33 @@ public class ObserverCommandTest {
         history.undo();
 
         assertEquals(1, engine.getTowers().size());
-        assertEquals(400, state.getGold()); // back to post-purchase amount
+        assertEquals(400, state.getGold());
     }
 
     @Test
     public void upgradeTower_execute_boostsDamageAndRange() {
         Tower tower = new BasicTower(map.getCell(1, 0));
         int originalDamage = tower.getDamage();
-        int originalRange = tower.getRange();
+        int originalRange  = tower.getRange();
 
         history.execute(new UpgradeTowerCommand(tower, state));
 
         assertEquals(originalDamage + 10, tower.getDamage());
-        assertEquals(originalRange + 1, tower.getRange());
-        assertEquals(425, state.getGold()); // 500 - 75
+        assertEquals(originalRange  + 1,  tower.getRange());
+        assertEquals(425, state.getGold());
     }
 
     @Test
     public void upgradeTower_undo_restoresStatsAndGold() {
         Tower tower = new BasicTower(map.getCell(1, 0));
         int originalDamage = tower.getDamage();
-        int originalRange = tower.getRange();
+        int originalRange  = tower.getRange();
 
         history.execute(new UpgradeTowerCommand(tower, state));
         history.undo();
 
         assertEquals(originalDamage, tower.getDamage());
-        assertEquals(originalRange, tower.getRange());
+        assertEquals(originalRange,  tower.getRange());
         assertEquals(500, state.getGold());
     }
 
@@ -178,31 +177,23 @@ public class ObserverCommandTest {
         history.execute(new PlaceTowerCommand(engine, state, t2));
         assertEquals(2, engine.getTowers().size());
 
-        history.undo(); // undo sniper
+        history.undo();
         assertEquals(1, engine.getTowers().size());
         assertTrue(engine.getTowers().contains(t1));
 
-        history.undo(); // undo basic
+        history.undo();
         assertEquals(0, engine.getTowers().size());
     }
 
     @Test
     public void commandHistory_undoWhenEmpty_doesNothing() {
-        history.undo(); // should not throw
+        history.undo();
         assertFalse(history.canUndo());
     }
 
-    // Helper to build a GameObserver from four lambdas without an anonymous class
-    private GameObserver observerWith(
-            java.util.function.IntConsumer onLives,
-            java.util.function.IntConsumer onScore,
-            java.util.function.IntConsumer onWave,
-            java.util.function.IntConsumer onGold) {
-        return new GameObserver() {
-            public void onLivesChanged(int v) { onLives.accept(v); }
-            public void onScoreChanged(int v) { onScore.accept(v); }
-            public void onWaveChanged(int v)  { onWave.accept(v); }
-            public void onGoldChanged(int v)  { onGold.accept(v); }
+    private ITowerDefenseObserver eventObserver(EventType targetType, List<Integer> received) {
+        return (eventType, eventObject) -> {
+            if (eventType == targetType) received.add((Integer) eventObject);
         };
     }
 }

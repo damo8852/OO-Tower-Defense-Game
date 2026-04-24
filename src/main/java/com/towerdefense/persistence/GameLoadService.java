@@ -1,18 +1,16 @@
 package com.towerdefense.persistence;
 
 import com.towerdefense.engine.GameEngine;
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 import com.towerdefense.model.GameState;
-import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
-import com.towerdefense.model.tower.BasicTower;
-import com.towerdefense.model.tower.SniperTower;
-import com.towerdefense.model.tower.SplashTower;
-import com.towerdefense.pattern.command.CommandHistory;
-import com.towerdefense.pattern.command.CommandRecord;
-import com.towerdefense.pattern.command.PlaceTowerCommand;
-import com.towerdefense.pattern.command.SellTowerCommand;
-import com.towerdefense.pattern.command.UpgradeTowerCommand;
+import com.towerdefense.model.tower.Tower;
+import com.towerdefense.model.tower.TowerFactory;
+import com.towerdefense.command.CommandHistory;
+import com.towerdefense.command.CommandRecord;
+import com.towerdefense.command.PlaceTowerCommand;
+import com.towerdefense.command.SellTowerCommand;
+import com.towerdefense.command.UpgradeTowerCommand;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +37,7 @@ public class GameLoadService {
                                CommandHistory history) {
         switch (r.type()) {
             case CommandRecord.TYPE_PLACE -> {
-                Cell cell = engine.getMap().getCell(r.row(), r.col());
+                Tile cell = engine.getMap().getCell(r.row(), r.col());
                 Tower tower = createTower(TowerType.valueOf(r.towerType()), cell);
                 history.execute(new PlaceTowerCommand(engine, state, tower));
             }
@@ -52,12 +50,8 @@ public class GameLoadService {
         }
     }
 
-    private Tower createTower(TowerType type, Cell cell) {
-        return switch (type) {
-            case BASIC  -> new BasicTower(cell);
-            case SNIPER -> new SniperTower(cell);
-            case SPLASH -> new SplashTower(cell);
-        };
+    private Tower createTower(TowerType type, Tile cell) {
+        return TowerFactory.forType(type).create(cell);
     }
 
     private List<CommandRecord> parseCommands(String json) {

@@ -1,7 +1,7 @@
 package com.towerdefense.persistence;
 
 import com.towerdefense.model.GameState;
-import com.towerdefense.pattern.command.CommandRecord;
+import com.towerdefense.command.CommandRecord;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
