@@ -1,8 +1,7 @@
 package com.towerdefense.model;
 
-import com.towerdefense.pattern.observer.GameObserver;
-import java.util.ArrayList;
-import java.util.List;
+import com.towerdefense.eventbus.EventBus;
+import com.towerdefense.eventbus.EventType;
 
 public class GameState {
 
@@ -13,7 +12,6 @@ public class GameState {
     private int score;
     private int wave;
     private int gold;
-    private final List<GameObserver> observers = new ArrayList<>();
 
     public GameState(int lives, int gold) {
         this.initialLives = lives;
@@ -24,10 +22,6 @@ public class GameState {
         this.gold  = gold;
     }
 
-    public void addObserver(GameObserver observer) {
-        observers.add(observer);
-    }
-
     public int getLives() { return lives; }
     public int getScore() { return score; }
     public int getWave()  { return wave;  }
@@ -35,27 +29,27 @@ public class GameState {
 
     public void loseLife() {
         lives--;
-        observers.forEach(o -> o.onLivesChanged(lives));
+        EventBus.getInstance().postEvent(EventType.LIVES_CHANGED, lives);
     }
 
     public void addScore(int score) {
         this.score += score;
-        observers.forEach(o -> o.onScoreChanged(this.score));
+        EventBus.getInstance().postEvent(EventType.SCORE_CHANGED, this.score);
     }
 
     public void nextWave() {
         wave++;
-        observers.forEach(o -> o.onWaveChanged(wave));
+        EventBus.getInstance().postEvent(EventType.WAVE_CHANGED, wave);
     }
 
     public void addGold(int gold) {
         this.gold += gold;
-        observers.forEach(o -> o.onGoldChanged(this.gold));
+        EventBus.getInstance().postEvent(EventType.GOLD_CHANGED, this.gold);
     }
 
     public void spendGold(int gold) {
         this.gold -= gold;
-        observers.forEach(o -> o.onGoldChanged(this.gold));
+        EventBus.getInstance().postEvent(EventType.GOLD_CHANGED, this.gold);
     }
 
     public boolean isGameOver() { return lives <= 0; }
@@ -65,10 +59,7 @@ public class GameState {
         this.score = 0;
         this.wave  = 0;
         this.gold  = initialGold;
-        observers.forEach(o -> o.onLivesChanged(lives));
-        observers.forEach(o -> o.onScoreChanged(score));
-        observers.forEach(o -> o.onWaveChanged(wave));
-        observers.forEach(o -> o.onGoldChanged(gold));
+        publishAll();
     }
 
     public void restoreSnapshot(int lives, int score, int wave, int gold) {
@@ -76,9 +67,13 @@ public class GameState {
         this.score = score;
         this.wave  = wave;
         this.gold  = gold;
-        observers.forEach(o -> o.onLivesChanged(lives));
-        observers.forEach(o -> o.onScoreChanged(score));
-        observers.forEach(o -> o.onWaveChanged(wave));
-        observers.forEach(o -> o.onGoldChanged(gold));
+        publishAll();
+    }
+
+    private void publishAll() {
+        EventBus.getInstance().postEvent(EventType.LIVES_CHANGED, lives);
+        EventBus.getInstance().postEvent(EventType.SCORE_CHANGED, score);
+        EventBus.getInstance().postEvent(EventType.WAVE_CHANGED,  wave);
+        EventBus.getInstance().postEvent(EventType.GOLD_CHANGED,  gold);
     }
 }

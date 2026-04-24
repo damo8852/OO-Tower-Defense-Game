@@ -2,18 +2,18 @@ package com.towerdefense.model.tower;
 
 import java.util.List;
 
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
 import com.towerdefense.model.enemy.IEnemy;
-import com.towerdefense.pattern.strategy.FirstInPathStrategy;
+import com.towerdefense.strategy.FirstInPathStrategy;
 
 public class SplashTower extends Tower {
 
     private static final int ATTACK_RANGE  = 2;
     private static final int ATTACK_DAMAGE = 10;
 
-    public SplashTower(Cell position) {
+    public SplashTower(Tile position) {
         super(position, new FirstInPathStrategy(), ATTACK_RANGE, ATTACK_DAMAGE, TowerType.SPLASH.getCost());
     }
 

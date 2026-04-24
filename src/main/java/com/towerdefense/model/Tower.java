@@ -3,19 +3,19 @@ package com.towerdefense.model;
 import java.util.List;
 
 import com.towerdefense.model.enemy.IEnemy;
-import com.towerdefense.pattern.strategy.TargetingStrategy;
+import com.towerdefense.strategy.TargetingStrategy;
 
 public abstract class Tower {
 
     private static final int SELL_VALUE_DIVISOR = 2;
 
-    private final Cell position;
+    private final Tile position;
     private final TargetingStrategy targetingStrategy;
     private int range;
     private int damage;
     private final int cost;
 
-    protected Tower(Cell position, TargetingStrategy targetingStrategy, int range, int damage, int cost) {
+    protected Tower(Tile position, TargetingStrategy targetingStrategy, int range, int damage, int cost) {
         this.position = position;
         this.targetingStrategy = targetingStrategy;
         this.range = range;
@@ -53,7 +53,7 @@ public abstract class Tower {
         range -= rangeDecrease;
     }
 
-    public Cell getPosition() { return position; }
+    public Tile getPosition() { return position; }
     public int getRange()     { return range; }
     public int getDamage()    { return damage; }
     public int getCost()      { return cost; }

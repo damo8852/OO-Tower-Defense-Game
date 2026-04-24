@@ -6,7 +6,8 @@ import com.towerdefense.model.GameState;
 import com.towerdefense.model.tower.BasicTower;
 import com.towerdefense.model.tower.SniperTower;
 import com.towerdefense.model.tower.SplashTower;
-import com.towerdefense.pattern.factory.*;
+import com.towerdefense.model.enemy.EnemyFactory;
+import com.towerdefense.model.enemy.WaveSpawner;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,14 +27,13 @@ public class GameEngineTest {
         state = new GameState(20, 200);
 
         WaveSpawner spawner = new WaveSpawner(List.of(
-                new BasicEnemyFactory(),
-                new FastEnemyFactory(),
-                new ArmoredEnemyFactory()
+                new EnemyFactory.Basic(),
+                new EnemyFactory.Fast(),
+                new EnemyFactory.Armored()
         ));
 
         engine = new GameEngine(map, state, spawner);
 
-        // Place towers on non-path cells
         engine.addTower(new BasicTower(map.getCell(1, 0)));
         engine.addTower(new SniperTower(map.getCell(2, 0)));
         engine.addTower(new SplashTower(map.getCell(1, 1)));
@@ -72,10 +72,9 @@ public class GameEngineTest {
 
     @Test
     public void livesDeductedWhenEnemyReachesEnd() {
-        // Use a map with no towers so enemies always escape
         GameMap emptyMap = new GameMap(3, 3);
         GameState emptyState = new GameState(20, 0);
-        WaveSpawner spawner = new WaveSpawner(List.of(new BasicEnemyFactory()));
+        WaveSpawner spawner = new WaveSpawner(List.of(new EnemyFactory.Basic()));
         GameEngine emptyEngine = new GameEngine(emptyMap, emptyState, spawner);
 
         emptyEngine.startNextWave();
@@ -89,7 +88,7 @@ public class GameEngineTest {
         com.towerdefense.model.enemy.ArmoredEnemy armored =
                 new com.towerdefense.model.enemy.ArmoredEnemy(map.getPath());
         armored.takeDamage(100);
-        assertEquals(150, armored.getHealth()); // 200 - 100/2 = 150
+        assertEquals(150, armored.getHealth());
     }
 
     @Test

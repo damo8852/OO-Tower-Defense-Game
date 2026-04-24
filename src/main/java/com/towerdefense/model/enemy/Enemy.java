@@ -2,7 +2,7 @@ package com.towerdefense.model.enemy;
 
 import java.util.List;
 
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 
 public abstract class Enemy implements IEnemy {
 
@@ -11,9 +11,9 @@ public abstract class Enemy implements IEnemy {
     private final int reward;
     private final int speed;
     private int pathIndex;
-    private final List<Cell> path;
+    private final List<Tile> path;
 
-    protected Enemy(List<Cell> path, int health, int speed, int reward) {
+    protected Enemy(List<Tile> path, int health, int speed, int reward) {
         this.path = path;
         this.health = health;
         this.maxHealth = health;
@@ -43,7 +43,7 @@ public abstract class Enemy implements IEnemy {
     }
 
     @Override
-    public Cell getPosition() {
+    public Tile getPosition() {
         return path.get(pathIndex);
     }
 

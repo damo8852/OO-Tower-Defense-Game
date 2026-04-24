@@ -8,7 +8,7 @@ import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
 import com.towerdefense.model.Tower;
 import com.towerdefense.model.enemy.IEnemy;
-import com.towerdefense.pattern.factory.WaveSpawner;
+import com.towerdefense.model.enemy.WaveSpawner;
 
 public class GameEngine {
 

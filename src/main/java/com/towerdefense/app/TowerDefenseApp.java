@@ -3,12 +3,10 @@ package com.towerdefense.app;
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
-import com.towerdefense.pattern.command.CommandHistory;
-import com.towerdefense.pattern.command.UpgradeTowerCommand;
-import com.towerdefense.pattern.factory.ArmoredEnemyFactory;
-import com.towerdefense.pattern.factory.BasicEnemyFactory;
-import com.towerdefense.pattern.factory.FastEnemyFactory;
-import com.towerdefense.pattern.factory.WaveSpawner;
+import com.towerdefense.command.CommandHistory;
+import com.towerdefense.command.UpgradeTowerCommand;
+import com.towerdefense.model.enemy.EnemyFactory;
+import com.towerdefense.model.enemy.WaveSpawner;
 import com.towerdefense.persistence.GameLoadService;
 import com.towerdefense.persistence.GameSaveService;
 import com.towerdefense.ui.HudView;
@@ -72,15 +70,13 @@ public class TowerDefenseApp extends Application {
         GameMap map = new GameMap(MAP_ROWS, MAP_COLS);
         gameState = new GameState(DEFAULT_LIVES, DEFAULT_GOLD);
         WaveSpawner waveSpawner = new WaveSpawner(List.of(
-                new BasicEnemyFactory(), new FastEnemyFactory(), new ArmoredEnemyFactory()));
+                new EnemyFactory.Basic(), new EnemyFactory.Fast(), new EnemyFactory.Armored()));
         engine = new GameEngine(map, gameState, waveSpawner);
         commandHistory = new CommandHistory();
     }
 
     private HudView buildHud() {
-        HudView hud = new HudView(DEFAULT_LIVES, 0, 0, DEFAULT_GOLD);
-        gameState.addObserver(hud);
-        return hud;
+        return new HudView(DEFAULT_LIVES, 0, 0, DEFAULT_GOLD);
     }
 
     private void buildStage(Stage stage, HudView hudView, TowerSelectionPanel selectionPanel) {

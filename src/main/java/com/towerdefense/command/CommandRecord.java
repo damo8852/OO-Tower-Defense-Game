@@ -1,4 +1,4 @@
-package com.towerdefense.pattern.command;
+package com.towerdefense.command;
 
 public record CommandRecord(String type, String towerType, int row, int col) {
 

@@ -7,13 +7,13 @@ public class GameMap {
 
     private final int rows;
     private final int cols;
-    private final Cell[][] grid;
-    private final List<Cell> path;
+    private final Tile[][] grid;
+    private final List<Tile> path;
 
     public GameMap(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
-        this.grid = new Cell[rows][cols];
+        this.grid = new Tile[rows][cols];
         this.path = new ArrayList<>();
         initGrid();
         buildPath();
@@ -22,7 +22,7 @@ public class GameMap {
     private void initGrid() {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                grid[r][c] = new Cell(r, c, Cell.Type.EMPTY);
+                grid[r][c] = new Tile(r, c, Tile.Type.EMPTY);
             }
         }
     }
@@ -35,24 +35,24 @@ public class GameMap {
     }
 
     private void markPath(int r, int c) {
-        grid[r][c].setType(Cell.Type.PATH);
+        grid[r][c].setType(Tile.Type.PATH);
         path.add(grid[r][c]);
     }
 
-    public Cell getCell(int row, int col) { return grid[row][col]; }
-    public List<Cell> getPath() { return List.copyOf(path); }
+    public Tile getCell(int row, int col) { return grid[row][col]; }
+    public List<Tile> getPath() { return List.copyOf(path); }
     public int getRows() { return rows; }
     public int getCols() { return cols; }
 
     public boolean canPlaceTower(int row, int col) {
-        return grid[row][col].getType() == Cell.Type.EMPTY;
+        return grid[row][col].getType() == Tile.Type.EMPTY;
     }
 
     public void placeTower(int row, int col) {
-        grid[row][col].setType(Cell.Type.TOWER);
+        grid[row][col].setType(Tile.Type.TOWER);
     }
 
     public void removeTower(int row, int col) {
-        grid[row][col].setType(Cell.Type.EMPTY);
+        grid[row][col].setType(Tile.Type.EMPTY);
     }
 }

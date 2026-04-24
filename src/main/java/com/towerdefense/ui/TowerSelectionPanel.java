@@ -1,6 +1,6 @@
 package com.towerdefense.ui;
 
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
 import com.towerdefense.model.tower.BasicTower;
@@ -37,7 +37,7 @@ public class TowerSelectionPanel extends VBox {
         getChildren().add(btn);
     }
 
-    public Tower createTower(Cell cell) {
+    public Tower createTower(Tile cell) {
         if (group.getSelectedToggle() == null) return null;
         TowerType type = typeMap.get((ToggleButton) group.getSelectedToggle());
         return switch (type) {

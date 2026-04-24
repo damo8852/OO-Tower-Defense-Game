@@ -1,6 +1,6 @@
 package com.towerdefense.model.enemy;
 
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 import java.util.List;
 
 public class FastEnemy extends Enemy {
@@ -9,7 +9,7 @@ public class FastEnemy extends Enemy {
     private static final int MOVE_SPEED     = 2;
     private static final int KILL_REWARD    = 15;
 
-    public FastEnemy(List<Cell> path) {
+    public FastEnemy(List<Tile> path) {
         super(path, DEFAULT_HEALTH, MOVE_SPEED, KILL_REWARD);
     }
 

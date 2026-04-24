@@ -3,16 +3,16 @@ package com.towerdefense.ui;
 import java.util.Map;
 
 import com.towerdefense.engine.GameEngine;
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 import com.towerdefense.model.GameState;
 import com.towerdefense.model.Tower;
 import com.towerdefense.model.TowerType;
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.enemy.IEnemy;
-import com.towerdefense.pattern.command.CommandHistory;
-import com.towerdefense.pattern.command.PlaceTowerCommand;
-import com.towerdefense.pattern.command.SellTowerCommand;
-import com.towerdefense.pattern.command.UpgradeTowerCommand;
+import com.towerdefense.command.CommandHistory;
+import com.towerdefense.command.PlaceTowerCommand;
+import com.towerdefense.command.SellTowerCommand;
+import com.towerdefense.command.UpgradeTowerCommand;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -91,8 +91,8 @@ public class MapGridView extends Canvas {
         GameMap map = engine.getMap();
         for (int r = 0; r < map.getRows(); r++) {
             for (int c = 0; c < map.getCols(); c++) {
-                Cell cell = map.getCell(r, c);
-                Tower tower = cell.getType() == Cell.Type.TOWER
+                Tile cell = map.getCell(r, c);
+                Tower tower = cell.getType() == Tile.Type.TOWER
                         ? engine.getTowerAt(r, c).orElse(null)
                         : null;
                 drawCell(gc, r, c, cell, tower);
@@ -100,7 +100,7 @@ public class MapGridView extends Canvas {
         }
     }
 
-    private void drawCell(GraphicsContext gc, int r, int c, Cell cell, Tower tower) {
+    private void drawCell(GraphicsContext gc, int r, int c, Tile cell, Tower tower) {
         double x = c * TILE_SIZE;
         double y = r * TILE_SIZE;
 
@@ -113,7 +113,7 @@ public class MapGridView extends Canvas {
         if (tower != null) drawTower(gc, x, y, tower);
     }
 
-    private Color cellColor(Cell.Type type, Tower tower) {
+    private Color cellColor(Tile.Type type, Tower tower) {
         return switch (type) {
             case PATH  -> COLOR_PATH;
             case EMPTY -> COLOR_EMPTY;
@@ -137,7 +137,7 @@ public class MapGridView extends Canvas {
     }
 
     private void drawEnemy(GraphicsContext gc, IEnemy e) {
-        Cell pos = e.getPosition();
+        Tile pos = e.getPosition();
         double x = pos.getCol() * TILE_SIZE;
         double y = pos.getRow() * TILE_SIZE;
 
@@ -162,15 +162,15 @@ public class MapGridView extends Canvas {
         GameMap map = engine.getMap();
         if (row < 0 || row >= map.getRows() || col < 0 || col >= map.getCols()) return;
 
-        Cell cell = map.getCell(row, col);
+        Tile cell = map.getCell(row, col);
         if (event.getButton() == MouseButton.PRIMARY) {
             handlePrimaryClick(cell, row, col);
         } else if (event.getButton() == MouseButton.SECONDARY) {
-            if (cell.getType() == Cell.Type.TOWER) sellTower(row, col);
+            if (cell.getType() == Tile.Type.TOWER) sellTower(row, col);
         }
     }
 
-    private void handlePrimaryClick(Cell cell, int row, int col) {
+    private void handlePrimaryClick(Tile cell, int row, int col) {
         switch (cell.getType()) {
             case EMPTY -> placeTower(cell);
             case TOWER -> upgradeTower(row, col);
@@ -178,7 +178,7 @@ public class MapGridView extends Canvas {
         }
     }
 
-    private void placeTower(Cell cell) {
+    private void placeTower(Tile cell) {
         Tower tower = selectionPanel.createTower(cell);
         if (tower == null || gameState.getGold() < tower.getCost()) return;
         commandHistory.execute(new PlaceTowerCommand(engine, gameState, tower));

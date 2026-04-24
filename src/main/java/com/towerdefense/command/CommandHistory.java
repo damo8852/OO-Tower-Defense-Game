@@ -1,4 +1,4 @@
-package com.towerdefense.pattern.command;
+package com.towerdefense.command;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

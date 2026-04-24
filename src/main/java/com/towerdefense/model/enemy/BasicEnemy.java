@@ -2,7 +2,7 @@ package com.towerdefense.model.enemy;
 
 import java.util.List;
 
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 
 public class BasicEnemy extends Enemy {
 
@@ -10,7 +10,7 @@ public class BasicEnemy extends Enemy {
     private static final int MOVE_SPEED     = 1;
     private static final int KILL_REWARD    = 10;
 
-    public BasicEnemy(List<Cell> path) {
+    public BasicEnemy(List<Tile> path) {
         super(path, DEFAULT_HEALTH, MOVE_SPEED, KILL_REWARD);
     }
 

@@ -1,13 +1,13 @@
 package com.towerdefense.model.enemy;
 
-import com.towerdefense.model.Cell;
+import com.towerdefense.model.Tile;
 
 public interface IEnemy {
     void move();
     void takeDamage(int damage);
     boolean isAlive();
     boolean hasReachedEnd();
-    Cell getPosition();
+    Tile getPosition();
     int getPathIndex();
     int getHealth();
     int getMaxHealth();

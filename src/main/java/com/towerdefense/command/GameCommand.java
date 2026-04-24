@@ -1,4 +1,4 @@
-package com.towerdefense.pattern.command;
+package com.towerdefense.command;
 
 public interface GameCommand {
     void execute();

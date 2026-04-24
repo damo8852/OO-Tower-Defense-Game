@@ -1,6 +1,6 @@
 package com.towerdefense.model;
 
-public class Cell {
+public class Tile {
 
     public enum Type { EMPTY, PATH, TOWER }
 
@@ -8,13 +8,13 @@ public class Cell {
     private final int col;
     private Type type;
 
-    public Cell(int row, int col, Type type) {
+    public Tile(int row, int col, Type type) {
         this.row = row;
         this.col = col;
         this.type = type;
     }
 
-    public double distanceTo(Cell other) {
+    public double distanceTo(Tile other) {
         int dr = this.row - other.row;
         int dc = this.col - other.col;
         return Math.sqrt(dr * dr + dc * dc);

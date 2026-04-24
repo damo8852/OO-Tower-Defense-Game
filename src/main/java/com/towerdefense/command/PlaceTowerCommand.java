@@ -1,16 +1,16 @@
-package com.towerdefense.pattern.command;
+package com.towerdefense.command;
 
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.GameState;
 import com.towerdefense.model.Tower;
 
-public class SellTowerCommand implements GameCommand {
+public class PlaceTowerCommand implements GameCommand {
 
     private final GameEngine engine;
     private final GameState gameState;
     private final Tower tower;
 
-    public SellTowerCommand(GameEngine engine, GameState gameState, Tower tower) {
+    public PlaceTowerCommand(GameEngine engine, GameState gameState, Tower tower) {
         this.engine = engine;
         this.gameState = gameState;
         this.tower = tower;
@@ -18,19 +18,19 @@ public class SellTowerCommand implements GameCommand {
 
     @Override
     public void execute() {
-        engine.removeTower(tower);
-        gameState.addGold(tower.getSellValue());
+        engine.addTower(tower);
+        gameState.spendGold(tower.getCost());
     }
 
     @Override
     public void undo() {
-        engine.addTower(tower);
-        gameState.spendGold(tower.getSellValue());
+        engine.removeTower(tower);
+        gameState.addGold(tower.getCost());
     }
 
     @Override
     public CommandRecord toRecord() {
-        return new CommandRecord(CommandRecord.TYPE_SELL, null,
+        return new CommandRecord(CommandRecord.TYPE_PLACE, tower.getTowerType().name(),
                 tower.getPosition().getRow(), tower.getPosition().getCol());
     }
 }
