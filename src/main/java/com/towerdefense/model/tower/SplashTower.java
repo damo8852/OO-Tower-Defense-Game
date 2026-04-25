@@ -3,6 +3,7 @@ package com.towerdefense.model.tower;
 import java.util.List;
 
 import com.towerdefense.model.Tile;
+import com.towerdefense.model.TowerShot;
 import com.towerdefense.model.TowerType;
 import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.strategy.FirstInPathStrategy;
@@ -19,6 +20,19 @@ public class SplashTower extends Tower {
     @Override
     public void attack(List<IEnemy> enemies) {
         enemiesInRange(enemies).forEach(e -> e.takeDamage(getDamage()));
+    }
+
+    @Override
+    public Runnable planAttack(List<IEnemy> enemies) {
+        List<IEnemy> targets = enemiesInRange(enemies);
+        return () -> targets.forEach(e -> e.takeDamage(getDamage()));
+    }
+
+    @Override
+    public List<TowerShot> collectShots(List<IEnemy> enemies) {
+        return enemiesInRange(enemies).stream()
+                .map(e -> new TowerShot(getPosition(), e.getPosition(), getTowerType()))
+                .toList();
     }
 
     @Override

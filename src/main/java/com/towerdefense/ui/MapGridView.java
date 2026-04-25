@@ -1,9 +1,13 @@
 package com.towerdefense.ui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.towerdefense.engine.GameEngine;
 import com.towerdefense.model.Tile;
+import com.towerdefense.model.TowerShot;
 import com.towerdefense.model.GameState;
 import com.towerdefense.model.tower.Tower;
 import com.towerdefense.model.TowerType;
@@ -32,11 +36,14 @@ public class MapGridView extends Canvas {
     private static final int    LABEL_Y_OFFSET    = 28;
     private static final int    STATS_X_OFFSET    = 4;
     private static final int    STATS_Y_OFFSET    = 44;
-    private static final int    ENEMY_INSET       = 8;
-    private static final int    ENEMY_Y_OFFSET    = 11;
-    private static final int    HP_BAR_INSET      = 2;
-    private static final int    HP_BAR_HEIGHT     = 5;
-    private static final double GRID_STROKE_ALPHA = 0.35;
+    private static final int    ENEMY_INSET            = 8;
+    private static final int    ENEMY_Y_OFFSET         = 11;
+    private static final int    ENEMY_STACK_X_OFFSET   = 8;
+    private static final int    HP_BAR_INSET           = 2;
+    private static final int    HP_BAR_HEIGHT          = 5;
+    private static final double GRID_STROKE_ALPHA      = 0.35;
+    private static final double PROJECTILE_RADIUS      = 5.0;
+    private static final long   PROJECTILE_TRAVEL_NS   = 280_000_000L;
 
     private static final Color COLOR_PATH  = Color.SANDYBROWN;
     private static final Color COLOR_EMPTY = Color.color(0.18, 0.38, 0.18);
@@ -66,6 +73,8 @@ public class MapGridView extends Canvas {
     private final GameState gameState;
     private final CommandHistory commandHistory;
     private final TowerSelectionPanel selectionPanel;
+    private final List<Projectile> projectiles = new ArrayList<>();
+    private long lastRefreshNanos = -1;
 
     public MapGridView(GameEngine engine, GameState gameState,
                        CommandHistory commandHistory, TowerSelectionPanel selectionPanel) {
@@ -79,11 +88,34 @@ public class MapGridView extends Canvas {
     }
 
     public void refresh() {
+        long now = System.nanoTime();
+
+        engine.drainShots().forEach(shot -> projectiles.add(toProjectile(shot)));
+
+        if (lastRefreshNanos > 0) {
+            double fraction = (now - lastRefreshNanos) / (double) PROJECTILE_TRAVEL_NS;
+            projectiles.forEach(p -> p.advance(fraction));
+        }
+        lastRefreshNanos = now;
+        projectiles.removeIf(Projectile::isDone);
+
         GraphicsContext gc = getGraphicsContext2D();
         gc.clearRect(0, 0, getWidth(), getHeight());
         drawGrid(gc);
+        drawProjectiles(gc);
         drawEnemies(gc);
     }
+
+    private Projectile toProjectile(TowerShot shot) {
+        Color color = TOWER_COLORS.getOrDefault(shot.towerType(), Color.WHITE);
+        return new Projectile(
+                tileCenterX(shot.origin()), tileCenterY(shot.origin()),
+                tileCenterX(shot.target()), tileCenterY(shot.target()),
+                color);
+    }
+
+    private double tileCenterX(Tile t) { return t.getCol() * TILE_SIZE + TILE_SIZE / 2.0; }
+    private double tileCenterY(Tile t) { return t.getRow() * TILE_SIZE + TILE_SIZE / 2.0; }
 
     // --- grid drawing ---
 
@@ -130,15 +162,29 @@ public class MapGridView extends Canvas {
         gc.fillText("D:" + tower.getDamage() + " R:" + tower.getRange(), x + STATS_X_OFFSET, y + STATS_Y_OFFSET);
     }
 
+    // --- projectile drawing ---
+
+    private void drawProjectiles(GraphicsContext gc) {
+        for (Projectile p : projectiles) {
+            gc.setFill(p.color);
+            double r = PROJECTILE_RADIUS;
+            gc.fillOval(p.x() - r, p.y() - r, r * 2, r * 2);
+        }
+    }
+
     // --- enemy drawing ---
 
     private void drawEnemies(GraphicsContext gc) {
-        engine.getActiveEnemies().forEach(e -> drawEnemy(gc, e));
+        Map<Tile, Integer> countByTile = new HashMap<>();
+        for (IEnemy e : engine.getActiveEnemies()) {
+            int stackIdx = countByTile.merge(e.getPosition(), 1, Integer::sum) - 1;
+            drawEnemy(gc, e, stackIdx * ENEMY_STACK_X_OFFSET);
+        }
     }
 
-    private void drawEnemy(GraphicsContext gc, IEnemy e) {
+    private void drawEnemy(GraphicsContext gc, IEnemy e, double xShift) {
         Tile pos = e.getPosition();
-        double x = pos.getCol() * TILE_SIZE;
+        double x = pos.getCol() * TILE_SIZE + xShift;
         double y = pos.getRow() * TILE_SIZE;
 
         double hpRatio = (double) e.getHealth() / e.getMaxHealth();

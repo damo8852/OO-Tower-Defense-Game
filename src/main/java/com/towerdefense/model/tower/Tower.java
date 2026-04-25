@@ -1,6 +1,7 @@
 package com.towerdefense.model.tower;
 
 import com.towerdefense.model.Tile;
+import com.towerdefense.model.TowerShot;
 import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.strategy.TargetingStrategy;
 
@@ -29,6 +30,21 @@ public abstract class Tower implements ITower {
         if (target != null) {
             target.takeDamage(damage);
         }
+    }
+
+    protected Runnable planSingleTargetAttack(List<IEnemy> enemies) {
+        IEnemy target = targetingStrategy.select(enemiesInRange(enemies), position);
+        return target == null ? null : () -> target.takeDamage(damage);
+    }
+
+    public abstract Runnable planAttack(List<IEnemy> enemies);
+
+    public abstract List<TowerShot> collectShots(List<IEnemy> enemies);
+
+    protected List<TowerShot> singleShot(List<IEnemy> enemies) {
+        IEnemy target = targetingStrategy.select(enemiesInRange(enemies), position);
+        return target == null ? List.of()
+                : List.of(new TowerShot(position, target.getPosition(), getTowerType()));
     }
 
     protected List<IEnemy> enemiesInRange(List<IEnemy> enemies) {

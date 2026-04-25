@@ -3,6 +3,7 @@ package com.towerdefense.model.tower;
 import java.util.List;
 
 import com.towerdefense.model.Tile;
+import com.towerdefense.model.TowerShot;
 import com.towerdefense.model.TowerType;
 import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.strategy.StrongestEnemyStrategy;
@@ -19,6 +20,16 @@ public class SniperTower extends Tower {
     @Override
     public void attack(List<IEnemy> enemies) {
         attackSingleTarget(enemies);
+    }
+
+    @Override
+    public Runnable planAttack(List<IEnemy> enemies) {
+        return planSingleTargetAttack(enemies);
+    }
+
+    @Override
+    public List<TowerShot> collectShots(List<IEnemy> enemies) {
+        return singleShot(enemies);
     }
 
     @Override
