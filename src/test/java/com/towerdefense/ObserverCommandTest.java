@@ -30,7 +30,7 @@ public class ObserverCommandTest {
     @Before
     public void setUp() {
         EventBus.resetForTesting();
-        map = new GameMap(5, 5);
+        map = new GameMap.Builder().size(5, 5).withUPath().build();
         state = new GameState(20, 500);
         WaveSpawner spawner = new WaveSpawner(List.of(new EnemyFactory.Basic()));
         engine = new GameEngine(map, state, spawner);
