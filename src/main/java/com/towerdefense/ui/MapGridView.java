@@ -5,18 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.towerdefense.engine.GameEngine;
-import com.towerdefense.model.Tile;
-import com.towerdefense.model.TowerShot;
-import com.towerdefense.model.GameState;
-import com.towerdefense.model.tower.Tower;
-import com.towerdefense.model.TowerType;
-import com.towerdefense.model.GameMap;
-import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.command.CommandHistory;
 import com.towerdefense.command.PlaceTowerCommand;
 import com.towerdefense.command.SellTowerCommand;
 import com.towerdefense.command.UpgradeTowerCommand;
+import com.towerdefense.engine.GameEngine;
+import com.towerdefense.model.GameMap;
+import com.towerdefense.model.GameState;
+import com.towerdefense.model.Tile;
+import com.towerdefense.model.TowerShot;
+import com.towerdefense.model.TowerType;
+import com.towerdefense.model.enemy.IEnemy;
+import com.towerdefense.model.tower.Tower;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -57,8 +57,6 @@ public class MapGridView extends Canvas {
         "FAST",    Color.GOLD,
         "ARMORED", Color.SILVER
     );
-
-    // All pixel values scale proportionally with tileSize
     private int tileSize = DEFAULT_TILE_SIZE;
 
     private int    labelSize()   { return tileSize * 16 / DEFAULT_TILE_SIZE; }
@@ -92,8 +90,7 @@ public class MapGridView extends Canvas {
         setOnMouseClicked(this::handleClick);
         refresh();
     }
-
-    /** Called by the app whenever the available space changes (window resize / fullscreen). */
+    @Override
     public void resize(double availW, double availH) {
         int cols = engine.getMap().getCols();
         int rows = engine.getMap().getRows();
@@ -134,8 +131,6 @@ public class MapGridView extends Canvas {
 
     private double tileCenterX(Tile t) { return t.getCol() * tileSize + tileSize / 2.0; }
     private double tileCenterY(Tile t) { return t.getRow() * tileSize + tileSize / 2.0; }
-
-    // --- grid ---
 
     private void drawGrid(GraphicsContext gc) {
         GameMap map = engine.getMap();
@@ -178,7 +173,7 @@ public class MapGridView extends Canvas {
         gc.fillText("D:" + tower.getDamage() + " R:" + tower.getRange(), x + statsXOff(), y + statsYOff());
     }
 
-    // --- projectiles ---
+    //projectiles
 
     private void drawProjectiles(GraphicsContext gc) {
         double r = projRadius();
@@ -188,7 +183,7 @@ public class MapGridView extends Canvas {
         }
     }
 
-    // --- enemies ---
+    //enemies
 
     private void drawEnemies(GraphicsContext gc) {
         Map<Tile, Integer> countByTile = new HashMap<>();
@@ -198,7 +193,6 @@ public class MapGridView extends Canvas {
         }
     }
 
-    /** Darkens a base colour by 15 % per wave beyond wave 1, bottoming out at 30 % brightness. */
     private static Color waveColor(Color base, int wave) {
         double factor = Math.max(0.30, 1.0 - (wave - 1) * 0.15);
         return new Color(base.getRed() * factor, base.getGreen() * factor, base.getBlue() * factor, 1.0);
@@ -221,8 +215,6 @@ public class MapGridView extends Canvas {
         gc.setFill(waveColor(ENEMY_COLORS.getOrDefault(e.getTypeName(), Color.RED), e.getWave()));
         gc.fillOval(x + ei, y + enemyYOff(), tileSize - ei * 2, tileSize - ei * 2);
     }
-
-    // --- clicks ---
 
     private void handleClick(MouseEvent event) {
         int col = (int) (event.getX() / tileSize);

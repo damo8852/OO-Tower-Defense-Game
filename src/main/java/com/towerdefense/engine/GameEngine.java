@@ -10,9 +10,9 @@ import java.util.Optional;
 import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
 import com.towerdefense.model.TowerShot;
-import com.towerdefense.model.tower.Tower;
 import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.model.enemy.WaveSpawner;
+import com.towerdefense.model.tower.Tower;
 
 public class GameEngine {
 
@@ -68,14 +68,7 @@ public class GameEngine {
         List<IEnemy> targetable = inPlay.stream()
                 .filter(e -> !e.hasReachedEnd())
                 .toList();
-
-        // Record shots (for UI projectile animation) before any damage changes state.
-        pendingShots = towers.stream()
-                .flatMap(t -> t.collectShots(targetable).stream())
-                .toList();
-
-        // Phase 1: all towers select targets based on the same alive-at-tick-start snapshot.
-        // Phase 2: all damage applied at once, so no tower can "steal" a target from another.
+        pendingShots = towers.stream().flatMap(t -> t.collectShots(targetable).stream()).toList();
         towers.stream()
                 .map(t -> t.planAttack(targetable))
                 .filter(Objects::nonNull)

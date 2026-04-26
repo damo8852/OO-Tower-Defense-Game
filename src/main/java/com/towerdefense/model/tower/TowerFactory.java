@@ -9,7 +9,7 @@ public abstract class TowerFactory {
 
     public static TowerFactory forType(TowerType type) {
         return switch (type) {
-            case BASIC  -> new Basic();
+            case BASIC -> new Basic();
             case SNIPER -> new Sniper();
             case SPLASH -> new Splash();
         };

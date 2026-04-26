@@ -5,9 +5,9 @@ import com.towerdefense.model.tower.Tower;
 
 public class UpgradeTowerCommand implements GameCommand {
 
-    private static final int DAMAGE_INCREASE  = 10;
-    private static final int RANGE_INCREASE   = 1;
-    public  static final int UPGRADE_COST     = 75;
+    private static final int DAMAGE_INCREASE = 10;
+    private static final int RANGE_INCREASE = 1;
+    public  static final int UPGRADE_COST = 75;
 
     private final Tower tower;
     private final GameState gameState;
