@@ -3,6 +3,8 @@ package com.towerdefense.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.towerdefense.model.MapType.U_SHAPE;
+
 public class GameMap {
 
     private final int rows;
@@ -40,6 +42,15 @@ public class GameMap {
             for (int c = 0; c < cols; c++)      markPath(0, c);
             for (int r = 1; r < rows; r++)       markPath(r, cols - 1);
             for (int c = cols - 2; c >= 0; c--)  markPath(rows - 1, c);
+            return this;
+        }
+
+        public Builder shape(MapType maptype){
+            if(maptype == MapType.U_SHAPE){
+                withUPath();
+            }else{
+                withSPath();
+            }
             return this;
         }
 

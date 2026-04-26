@@ -8,6 +8,7 @@ import com.towerdefense.command.CommandHistory;
 import com.towerdefense.command.UpgradeTowerCommand;
 import com.towerdefense.model.enemy.EnemyFactory;
 import com.towerdefense.model.enemy.WaveSpawner;
+import com.towerdefense.model.MapType;
 import com.towerdefense.persistence.GameLoadService;
 import com.towerdefense.persistence.GameSaveService;
 import com.towerdefense.ui.HudView;
@@ -23,7 +24,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -74,7 +78,8 @@ public class TowerDefenseApp extends Application {
     private Label          statusLabel;
     private Label          gameOverScoreLabel;
     private VBox           gameOverOverlay;
-    private boolean        waveRunning = false;
+    private boolean        waveRunning  = false;
+    private MapType        currentMapType = MapType.U_SHAPE;
 
     @Override
     public void start(Stage stage) {
@@ -142,7 +147,7 @@ public class TowerDefenseApp extends Application {
     // ── Game screen ───────────────────────────────────────────────
 
     private void buildDomain() {
-        GameMap map = GameMap.Builder.sShapeMap();
+        GameMap map = new GameMap.Builder().size(10, 10).shape(currentMapType).build();
         gameState = new GameState(DEFAULT_LIVES, DEFAULT_GOLD);
         WaveSpawner waveSpawner = new WaveSpawner(List.of(
                 new EnemyFactory.Basic(), new EnemyFactory.Fast(), new EnemyFactory.Armored()));
@@ -198,15 +203,48 @@ public class TowerDefenseApp extends Application {
         gameOverScoreLabel = new Label();
         gameOverScoreLabel.setStyle("-fx-font-size: 26; -fx-text-fill: white;");
 
-        Button menuBtn = new Button("Main Menu");
-        menuBtn.setStyle("-fx-font-size: 16;");
+        RadioButton uShapeRb = new RadioButton("U-Shape");
+        RadioButton sShapeRb = new RadioButton("S-Shape");
+        uShapeRb.setStyle("-fx-text-fill: white;");
+        sShapeRb.setStyle("-fx-text-fill: white;");
+        ToggleGroup mapToggle = new ToggleGroup();
+        uShapeRb.setToggleGroup(mapToggle);
+        sShapeRb.setToggleGroup(mapToggle);
+        if (currentMapType == MapType.U_SHAPE) {
+            uShapeRb.setSelected(true);
+        } else {
+            sShapeRb.setSelected(true);
+        }
+
+        Label selectMapLabel = new Label("Select Map:");
+        selectMapLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14;");
+
+        Button playAgainBtn = new Button("Play Again");
+        Button menuBtn      = new Button("Main Menu");
+        playAgainBtn.setStyle("-fx-font-size: 16; -fx-min-width: 180;");
+        menuBtn.setStyle("-fx-font-size: 16; -fx-min-width: 180;");
+
+        playAgainBtn.setOnAction(e -> {
+            if (uShapeRb.isSelected()) {
+                currentMapType = MapType.U_SHAPE;
+            } else {
+                currentMapType = MapType.S_SHAPE;
+            }
+            restartGame();
+        });
         menuBtn.setOnAction(e -> goToMainMenu());
 
-        VBox overlay = new VBox(20, title, gameOverScoreLabel, menuBtn);
+        VBox overlay = new VBox(16, title, gameOverScoreLabel, selectMapLabel, uShapeRb, sShapeRb, playAgainBtn, menuBtn);
         overlay.setAlignment(Pos.CENTER);
         overlay.setStyle("-fx-background-color: rgba(0,0,0,0.72);");
         overlay.setVisible(false);
         return overlay;
+    }
+
+    private void restartGame() {
+        detachHudView();
+        buildDomain();
+        launchGame();
     }
 
     private void goToMainMenu() {
