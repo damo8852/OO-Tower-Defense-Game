@@ -142,7 +142,7 @@ public class TowerDefenseApp extends Application {
     // ── Game screen ───────────────────────────────────────────────
 
     private void buildDomain() {
-        GameMap map = new GameMap(MAP_ROWS, MAP_COLS);
+        GameMap map = GameMap.Builder.sShapeMap();
         gameState = new GameState(DEFAULT_LIVES, DEFAULT_GOLD);
         WaveSpawner waveSpawner = new WaveSpawner(List.of(
                 new EnemyFactory.Basic(), new EnemyFactory.Fast(), new EnemyFactory.Armored()));

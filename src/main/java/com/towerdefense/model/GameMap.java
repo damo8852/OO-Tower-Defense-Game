@@ -10,13 +10,68 @@ public class GameMap {
     private final Tile[][] grid;
     private final List<Tile> path;
 
-    public GameMap(int rows, int cols) {
-        this.rows = rows;
-        this.cols = cols;
+    private GameMap(Builder builder) {
+        this.rows = builder.rows;
+        this.cols = builder.cols;
         this.grid = new Tile[rows][cols];
         this.path = new ArrayList<>();
         initGrid();
-        buildPath();
+        for (int[] coord : builder.pathCoords)
+            markPath(coord[0], coord[1]);
+    }
+
+    public static class Builder {
+        private int rows = 10;
+        private int cols = 10;
+        private final List<int[]> pathCoords = new ArrayList<>();
+
+        public Builder size(int rows, int cols) {
+            this.rows = rows;
+            this.cols = cols;
+            return this;
+        }
+
+        public Builder markPath(int r, int c) {
+            pathCoords.add(new int[]{r, c});
+            return this;
+        }
+
+        public Builder withUPath() {
+            for (int c = 0; c < cols; c++)      markPath(0, c);
+            for (int r = 1; r < rows; r++)       markPath(r, cols - 1);
+            for (int c = cols - 2; c >= 0; c--)  markPath(rows - 1, c);
+            return this;
+        }
+
+        public Builder withSPath() {
+            for (int r = 0; r < rows; r += 2) {
+                boolean leftToRight = (r / 2) % 2 == 0;
+                if (leftToRight) {
+                    for (int c = 0; c < cols; c++) markPath(r, c);
+                    if (r + 1 < rows) markPath(r + 1, cols - 1);
+                } else {
+                    for (int c = cols - 1; c >= 0; c--) markPath(r, c);
+                    if (r + 1 < rows) markPath(r + 1, 0);
+                }
+            }
+            return this;
+        }
+
+        public GameMap build() {
+            return new GameMap(this);
+        }
+
+        public static GameMap defaultMap() {
+            return new Builder().size(10, 10).withUPath().build();
+        }
+
+        public static GameMap sShapeMap() {
+            return new Builder().size(10, 10).withSPath().build();
+        }
+
+        public static GameMap customMap(int rows, int cols) {
+            return new Builder().size(rows, cols).withUPath().build();
+        }
     }
 
     private void initGrid() {
@@ -25,13 +80,6 @@ public class GameMap {
                 grid[r][c] = new Tile(r, c, Tile.Type.EMPTY);
             }
         }
-    }
-
-    // Fixed U-shaped path: left-to-right along row 0, down last col, right-to-left along last row
-    private void buildPath() {
-        for (int c = 0; c < cols; c++)       markPath(0, c);
-        for (int r = 1; r < rows; r++)        markPath(r, cols - 1);
-        for (int c = cols - 2; c >= 0; c--)  markPath(rows - 1, c);
     }
 
     private void markPath(int r, int c) {

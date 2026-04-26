@@ -23,7 +23,7 @@ public class GameEngineTest {
 
     @Before
     public void setUp() {
-        map = new GameMap(5, 5);
+        map = new GameMap.Builder().size(5, 5).withUPath().build();
         state = new GameState(20, 200);
 
         WaveSpawner spawner = new WaveSpawner(List.of(
@@ -72,7 +72,7 @@ public class GameEngineTest {
 
     @Test
     public void livesDeductedWhenEnemyReachesEnd() {
-        GameMap emptyMap = new GameMap(3, 3);
+        GameMap emptyMap = new GameMap.Builder().size(3, 3).withUPath().build();
         GameState emptyState = new GameState(20, 0);
         WaveSpawner spawner = new WaveSpawner(List.of(new EnemyFactory.Basic()));
         GameEngine emptyEngine = new GameEngine(emptyMap, emptyState, spawner);

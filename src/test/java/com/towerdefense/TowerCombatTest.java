@@ -24,7 +24,7 @@ public class TowerCombatTest {
     @Before
     public void setUp() {
         EventBus.resetForTesting();
-        map = new GameMap(5, 5);
+        map = new GameMap.Builder().size(5, 5).withUPath().build();
     }
 
     @Test
