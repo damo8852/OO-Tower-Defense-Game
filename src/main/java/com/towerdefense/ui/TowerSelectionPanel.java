@@ -20,7 +20,9 @@ public class TowerSelectionPanel extends VBox {
 
     public TowerSelectionPanel() {
         super(SPACING);
-        getChildren().add(new Label("Select Tower:"));
+        Label header = new Label("Select Tower:");
+        header.setStyle("-fx-text-fill: white;");
+        getChildren().add(header);
         addButton(TowerType.BASIC,  "Basic Tower  [B]");
         addButton(TowerType.SNIPER, "Sniper Tower [S]");
         addButton(TowerType.SPLASH, "Splash Tower [X]");

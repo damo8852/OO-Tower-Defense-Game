@@ -20,7 +20,7 @@ public class WaveSpawner {
         List<IEnemy> enemies = new ArrayList<>();
         int count = DEFAULT_ENEMY_COUNT + (waveNumber - 1) * ENEMIES_PER_WAVE_INCREMENT;
         for (int i = 0; i < count; i++) {
-            enemies.add(pickFactory(waveNumber, i).create(path));
+            enemies.add(pickFactory(waveNumber, i).create(path, waveNumber));
         }
         return enemies;
     }

@@ -86,7 +86,7 @@ public class GameEngineTest {
     @Test
     public void armoredEnemyTakesHalfDamage() {
         com.towerdefense.model.enemy.ArmoredEnemy armored =
-                new com.towerdefense.model.enemy.ArmoredEnemy(map.getPath());
+                new com.towerdefense.model.enemy.ArmoredEnemy(map.getPath(), 1);
         armored.takeDamage(100);
         assertEquals(150, armored.getHealth());
     }
@@ -94,9 +94,9 @@ public class GameEngineTest {
     @Test
     public void fastEnemyMovesAtDoubleSpeed() {
         com.towerdefense.model.enemy.FastEnemy fast =
-                new com.towerdefense.model.enemy.FastEnemy(map.getPath());
+                new com.towerdefense.model.enemy.FastEnemy(map.getPath(), 1);
         com.towerdefense.model.enemy.BasicEnemy basic =
-                new com.towerdefense.model.enemy.BasicEnemy(map.getPath());
+                new com.towerdefense.model.enemy.BasicEnemy(map.getPath(), 1);
 
         fast.move();
         basic.move();
