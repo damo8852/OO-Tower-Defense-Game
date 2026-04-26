@@ -23,6 +23,8 @@ public class HudView extends VBox implements ITowerDefenseObserver {
         scoreLabel = new Label("Score: " + score);
         waveLabel  = new Label("Wave:  " + wave);
         goldLabel  = new Label("Gold:  " + gold);
+        for (Label l : new Label[]{livesLabel, scoreLabel, waveLabel, goldLabel})
+            l.setStyle("-fx-text-fill: white;");
         getChildren().addAll(livesLabel, scoreLabel, waveLabel, goldLabel);
         EventBus.getInstance().attach(this);
     }

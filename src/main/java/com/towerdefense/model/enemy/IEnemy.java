@@ -12,5 +12,6 @@ public interface IEnemy {
     int getHealth();
     int getMaxHealth();
     int getReward();
+    int getWave();
     String getTypeName();
 }

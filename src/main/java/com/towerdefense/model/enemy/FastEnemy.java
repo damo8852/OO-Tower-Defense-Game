@@ -5,12 +5,13 @@ import java.util.List;
 
 public class FastEnemy extends Enemy {
 
-    private static final int DEFAULT_HEALTH = 60;
-    private static final int MOVE_SPEED     = 2;
-    private static final int KILL_REWARD    = 15;
+    private static final int BASE_HEALTH     = 60;
+    private static final int HEALTH_PER_WAVE = 12;
+    private static final int MOVE_SPEED      = 2;
+    private static final int KILL_REWARD     = 15;
 
-    public FastEnemy(List<Tile> path) {
-        super(path, DEFAULT_HEALTH, MOVE_SPEED, KILL_REWARD);
+    public FastEnemy(List<Tile> path, int wave) {
+        super(path, BASE_HEALTH + (wave - 1) * HEALTH_PER_WAVE, MOVE_SPEED, KILL_REWARD, wave);
     }
 
     @Override

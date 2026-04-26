@@ -6,6 +6,7 @@ import com.towerdefense.model.GameMap;
 import com.towerdefense.model.GameState;
 import com.towerdefense.model.enemy.BasicEnemy;
 import com.towerdefense.model.enemy.EnemyFactory;
+import com.towerdefense.model.enemy.IEnemy;
 import com.towerdefense.model.enemy.WaveSpawner;
 import com.towerdefense.model.tower.BasicTower;
 import com.towerdefense.model.tower.SplashTower;
@@ -28,7 +29,7 @@ public class TowerCombatTest {
 
     @Test
     public void basicTower_damagesEnemyInRange() {
-        BasicEnemy enemy = new BasicEnemy(map.getPath());
+        BasicEnemy enemy = new BasicEnemy(map.getPath(), 1);
         BasicTower tower = new BasicTower(map.getCell(1, 0));
 
         tower.attack(List.of(enemy));
@@ -38,7 +39,7 @@ public class TowerCombatTest {
 
     @Test
     public void basicTower_doesNotDamageEnemyOutOfRange() {
-        BasicEnemy enemy = new BasicEnemy(map.getPath());
+        BasicEnemy enemy = new BasicEnemy(map.getPath(), 1);
         BasicTower tower = new BasicTower(map.getCell(4, 0));
 
         tower.attack(List.of(enemy));
@@ -48,8 +49,8 @@ public class TowerCombatTest {
 
     @Test
     public void splashTower_damagesAllEnemiesInRange() {
-        BasicEnemy e1 = new BasicEnemy(map.getPath());
-        BasicEnemy e2 = new BasicEnemy(map.getPath());
+        BasicEnemy e1 = new BasicEnemy(map.getPath(), 1);
+        BasicEnemy e2 = new BasicEnemy(map.getPath(), 1);
         e2.move();
         SplashTower splash = new SplashTower(map.getCell(1, 0));
 
@@ -64,12 +65,14 @@ public class TowerCombatTest {
         GameState state = new GameState(20, 500);
         GameEngine engine = new GameEngine(map, state,
                 new WaveSpawner(List.of(new EnemyFactory.Basic())));
-        engine.addTower(new BasicTower(map.getCell(1, 0)));
+        // Tower at (1,2): after tick 1 the first enemy reaches (0,2) and becomes
+        // the nearest target in tick 2, letting the tower land the killing blow.
+        engine.addTower(new BasicTower(map.getCell(1, 2)));
 
         engine.startNextWave();
-        engine.getActiveEnemies().forEach(e -> e.takeDamage(99));
-
-        engine.tick();
+        engine.tick();                                           // enemy1 enters, moves to (0,1), takes 20 dmg → 80 HP
+        engine.getActiveEnemies().forEach(e -> e.takeDamage(61)); // bring to 19 HP
+        engine.tick();                                           // enemy1 moves to (0,2), nearest to (1,2), tower kills it
 
         assertTrue(state.getScore() >= 10);
         assertTrue(state.getGold()  >  500);
@@ -83,11 +86,11 @@ public class TowerCombatTest {
         engine.addTower(new BasicTower(map.getCell(1, 0)));
 
         engine.startNextWave();
-        int initialCount = engine.getActiveEnemies().size();
-        engine.getActiveEnemies().forEach(e -> e.takeDamage(99));
+        engine.tick();                                            // enemy1 enters active list
+        engine.getActiveEnemies().forEach(e -> e.takeDamage(999)); // kill all active enemies
+        engine.tick();                                            // cleanupDefeatedEnemies removes them
 
-        engine.tick();
-
-        assertTrue(engine.getActiveEnemies().size() < initialCount);
+        assertTrue("Dead enemies must not remain in the active list",
+                engine.getActiveEnemies().stream().allMatch(IEnemy::isAlive));
     }
 }

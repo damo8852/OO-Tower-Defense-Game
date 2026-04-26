@@ -28,22 +28,11 @@ import javafx.scene.text.FontWeight;
 
 public class MapGridView extends Canvas {
 
-    private static final int    TILE_SIZE         = 50;
-    private static final String FONT_NAME         = "Arial";
-    private static final int    FONT_LABEL_SIZE   = 16;
-    private static final int    FONT_STATS_SIZE   = 9;
-    private static final int    LABEL_X_OFFSET    = 17;
-    private static final int    LABEL_Y_OFFSET    = 28;
-    private static final int    STATS_X_OFFSET    = 4;
-    private static final int    STATS_Y_OFFSET    = 44;
-    private static final int    ENEMY_INSET            = 8;
-    private static final int    ENEMY_Y_OFFSET         = 11;
-    private static final int    ENEMY_STACK_X_OFFSET   = 8;
-    private static final int    HP_BAR_INSET           = 2;
-    private static final int    HP_BAR_HEIGHT          = 5;
-    private static final double GRID_STROKE_ALPHA      = 0.35;
-    private static final double PROJECTILE_RADIUS      = 5.0;
-    private static final long   PROJECTILE_TRAVEL_NS   = 280_000_000L;
+    private static final int    DEFAULT_TILE_SIZE    = 50;
+    private static final int    MIN_TILE_SIZE        = 20;
+    private static final String FONT_NAME            = "Arial";
+    private static final double GRID_STROKE_ALPHA    = 0.35;
+    private static final long   PROJECTILE_TRAVEL_NS = 280_000_000L;
 
     private static final Color COLOR_PATH  = Color.SANDYBROWN;
     private static final Color COLOR_EMPTY = Color.color(0.18, 0.38, 0.18);
@@ -69,6 +58,22 @@ public class MapGridView extends Canvas {
         "ARMORED", Color.SILVER
     );
 
+    // All pixel values scale proportionally with tileSize
+    private int tileSize = DEFAULT_TILE_SIZE;
+
+    private int    labelSize()   { return tileSize * 16 / DEFAULT_TILE_SIZE; }
+    private int    statsSize()   { return tileSize * 9  / DEFAULT_TILE_SIZE; }
+    private int    labelXOff()   { return tileSize * 17 / DEFAULT_TILE_SIZE; }
+    private int    labelYOff()   { return tileSize * 28 / DEFAULT_TILE_SIZE; }
+    private int    statsXOff()   { return tileSize * 4  / DEFAULT_TILE_SIZE; }
+    private int    statsYOff()   { return tileSize * 44 / DEFAULT_TILE_SIZE; }
+    private int    enemyInset()  { return tileSize * 8  / DEFAULT_TILE_SIZE; }
+    private int    enemyYOff()   { return tileSize * 11 / DEFAULT_TILE_SIZE; }
+    private int    hpBarInset()  { return Math.max(1, tileSize * 2 / DEFAULT_TILE_SIZE); }
+    private int    hpBarHeight() { return Math.max(2, tileSize * 5 / DEFAULT_TILE_SIZE); }
+    private int    stackXOff()   { return Math.max(1, tileSize * 8 / DEFAULT_TILE_SIZE); }
+    private double projRadius()  { return tileSize * 5.0 / DEFAULT_TILE_SIZE; }
+
     private final GameEngine engine;
     private final GameState gameState;
     private final CommandHistory commandHistory;
@@ -78,12 +83,25 @@ public class MapGridView extends Canvas {
 
     public MapGridView(GameEngine engine, GameState gameState,
                        CommandHistory commandHistory, TowerSelectionPanel selectionPanel) {
-        super(engine.getMap().getCols() * TILE_SIZE, engine.getMap().getRows() * TILE_SIZE);
+        super(engine.getMap().getCols() * DEFAULT_TILE_SIZE,
+              engine.getMap().getRows() * DEFAULT_TILE_SIZE);
         this.engine = engine;
         this.gameState = gameState;
         this.commandHistory = commandHistory;
         this.selectionPanel = selectionPanel;
         setOnMouseClicked(this::handleClick);
+        refresh();
+    }
+
+    /** Called by the app whenever the available space changes (window resize / fullscreen). */
+    public void resize(double availW, double availH) {
+        int cols = engine.getMap().getCols();
+        int rows = engine.getMap().getRows();
+        int newSize = Math.max(MIN_TILE_SIZE, (int) Math.min(availW / cols, availH / rows));
+        if (newSize == tileSize) return;
+        tileSize = newSize;
+        setWidth(cols * tileSize);
+        setHeight(rows * tileSize);
         refresh();
     }
 
@@ -114,10 +132,10 @@ public class MapGridView extends Canvas {
                 color);
     }
 
-    private double tileCenterX(Tile t) { return t.getCol() * TILE_SIZE + TILE_SIZE / 2.0; }
-    private double tileCenterY(Tile t) { return t.getRow() * TILE_SIZE + TILE_SIZE / 2.0; }
+    private double tileCenterX(Tile t) { return t.getCol() * tileSize + tileSize / 2.0; }
+    private double tileCenterY(Tile t) { return t.getRow() * tileSize + tileSize / 2.0; }
 
-    // --- grid drawing ---
+    // --- grid ---
 
     private void drawGrid(GraphicsContext gc) {
         GameMap map = engine.getMap();
@@ -133,15 +151,13 @@ public class MapGridView extends Canvas {
     }
 
     private void drawCell(GraphicsContext gc, int r, int c, Tile cell, Tower tower) {
-        double x = c * TILE_SIZE;
-        double y = r * TILE_SIZE;
-
+        double x = (double) c * tileSize;
+        double y = (double) r * tileSize;
         gc.setFill(cellColor(cell.getType(), tower));
-        gc.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        gc.fillRect(x, y, tileSize, tileSize);
         gc.setStroke(Color.color(0, 0, 0, GRID_STROKE_ALPHA));
         gc.setLineWidth(1);
-        gc.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
-
+        gc.strokeRect(x, y, tileSize, tileSize);
         if (tower != null) drawTower(gc, x, y, tower);
     }
 
@@ -156,55 +172,61 @@ public class MapGridView extends Canvas {
 
     private void drawTower(GraphicsContext gc, double x, double y, Tower tower) {
         gc.setFill(COLOR_LABEL);
-        gc.setFont(Font.font(FONT_NAME, FontWeight.BOLD, FONT_LABEL_SIZE));
-        gc.fillText(TOWER_LABELS.getOrDefault(tower.getTowerType(), "?"), x + LABEL_X_OFFSET, y + LABEL_Y_OFFSET);
-        gc.setFont(Font.font(FONT_NAME, FONT_STATS_SIZE));
-        gc.fillText("D:" + tower.getDamage() + " R:" + tower.getRange(), x + STATS_X_OFFSET, y + STATS_Y_OFFSET);
+        gc.setFont(Font.font(FONT_NAME, FontWeight.BOLD, labelSize()));
+        gc.fillText(TOWER_LABELS.getOrDefault(tower.getTowerType(), "?"), x + labelXOff(), y + labelYOff());
+        gc.setFont(Font.font(FONT_NAME, statsSize()));
+        gc.fillText("D:" + tower.getDamage() + " R:" + tower.getRange(), x + statsXOff(), y + statsYOff());
     }
 
-    // --- projectile drawing ---
+    // --- projectiles ---
 
     private void drawProjectiles(GraphicsContext gc) {
+        double r = projRadius();
         for (Projectile p : projectiles) {
             gc.setFill(p.color);
-            double r = PROJECTILE_RADIUS;
             gc.fillOval(p.x() - r, p.y() - r, r * 2, r * 2);
         }
     }
 
-    // --- enemy drawing ---
+    // --- enemies ---
 
     private void drawEnemies(GraphicsContext gc) {
         Map<Tile, Integer> countByTile = new HashMap<>();
         for (IEnemy e : engine.getActiveEnemies()) {
             int stackIdx = countByTile.merge(e.getPosition(), 1, Integer::sum) - 1;
-            drawEnemy(gc, e, stackIdx * ENEMY_STACK_X_OFFSET);
+            drawEnemy(gc, e, stackIdx * stackXOff());
         }
+    }
+
+    /** Darkens a base colour by 15 % per wave beyond wave 1, bottoming out at 30 % brightness. */
+    private static Color waveColor(Color base, int wave) {
+        double factor = Math.max(0.30, 1.0 - (wave - 1) * 0.15);
+        return new Color(base.getRed() * factor, base.getGreen() * factor, base.getBlue() * factor, 1.0);
     }
 
     private void drawEnemy(GraphicsContext gc, IEnemy e, double xShift) {
         Tile pos = e.getPosition();
-        double x = pos.getCol() * TILE_SIZE + xShift;
-        double y = pos.getRow() * TILE_SIZE;
+        double x = pos.getCol() * tileSize + xShift;
+        double y = pos.getRow() * tileSize;
 
         double hpRatio = (double) e.getHealth() / e.getMaxHealth();
+        int hpI = hpBarInset();
+        int hpH = hpBarHeight();
         gc.setFill(COLOR_HP_BG);
-        gc.fillRect(x + HP_BAR_INSET, y + HP_BAR_INSET,
-                TILE_SIZE - HP_BAR_INSET * 2, HP_BAR_HEIGHT);
+        gc.fillRect(x + hpI, y + hpI, tileSize - hpI * 2, hpH);
         gc.setFill(COLOR_HP_FG);
-        gc.fillRect(x + HP_BAR_INSET, y + HP_BAR_INSET,
-                (TILE_SIZE - HP_BAR_INSET * 2) * hpRatio, HP_BAR_HEIGHT);
+        gc.fillRect(x + hpI, y + hpI, (tileSize - hpI * 2) * hpRatio, hpH);
 
-        gc.setFill(ENEMY_COLORS.getOrDefault(e.getTypeName(), Color.RED));
-        gc.fillOval(x + ENEMY_INSET, y + ENEMY_Y_OFFSET,
-                TILE_SIZE - ENEMY_INSET * 2, TILE_SIZE - ENEMY_INSET * 2);
+        int ei = enemyInset();
+        gc.setFill(waveColor(ENEMY_COLORS.getOrDefault(e.getTypeName(), Color.RED), e.getWave()));
+        gc.fillOval(x + ei, y + enemyYOff(), tileSize - ei * 2, tileSize - ei * 2);
     }
 
-    // --- click handling ---
+    // --- clicks ---
 
     private void handleClick(MouseEvent event) {
-        int col = (int) (event.getX() / TILE_SIZE);
-        int row = (int) (event.getY() / TILE_SIZE);
+        int col = (int) (event.getX() / tileSize);
+        int row = (int) (event.getY() / tileSize);
         GameMap map = engine.getMap();
         if (row < 0 || row >= map.getRows() || col < 0 || col >= map.getCols()) return;
 

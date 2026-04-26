@@ -25,3 +25,4 @@ class Projectile {
     double x() { return fromX + (toX - fromX) * progress; }
     double y() { return fromY + (toY - fromY) * progress; }
 }
+

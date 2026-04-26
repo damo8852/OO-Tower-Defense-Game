@@ -10,15 +10,17 @@ public abstract class Enemy implements IEnemy {
     private final int maxHealth;
     private final int reward;
     private final int speed;
+    private final int wave;
     private int pathIndex;
     private final List<Tile> path;
 
-    protected Enemy(List<Tile> path, int health, int speed, int reward) {
+    protected Enemy(List<Tile> path, int health, int speed, int reward, int wave) {
         this.path = path;
         this.health = health;
         this.maxHealth = health;
         this.speed = speed;
         this.reward = reward;
+        this.wave = wave;
         this.pathIndex = 0;
     }
 
@@ -58,4 +60,7 @@ public abstract class Enemy implements IEnemy {
 
     @Override
     public int getReward() { return reward; }
+
+    @Override
+    public int getWave() { return wave; }
 }
