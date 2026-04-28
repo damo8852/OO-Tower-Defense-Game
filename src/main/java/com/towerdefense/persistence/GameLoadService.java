@@ -19,8 +19,8 @@ import java.util.List;
 
 public class GameLoadService {
 
-    public void load(String filePath, GameEngine engine, GameState state,
-                     CommandHistory history) throws IOException {
+    // read save file, replay commands, restore game state
+    public void load(String filePath, GameEngine engine, GameState state, CommandHistory history) throws IOException {
         String content = Files.readString(Path.of(filePath));
         int lives = extractTopLevelInt(content, GameSaveService.FIELD_LIVES);
         int score = extractTopLevelInt(content, GameSaveService.FIELD_SCORE);
@@ -33,6 +33,7 @@ public class GameLoadService {
         state.restoreSnapshot(lives, score, wave, gold);
     }
 
+    // replay one saved command back into the engine
     private void replayCommand(CommandRecord r, GameEngine engine, GameState state,
                                CommandHistory history) {
         switch (r.type()) {
@@ -50,10 +51,12 @@ public class GameLoadService {
         }
     }
 
+    // create tower of given type at tile
     private Tower createTower(TowerType type, Tile cell) {
         return TowerFactory.forType(type).create(cell);
     }
 
+    // parse all commands from the json array
     private List<CommandRecord> parseCommands(String json) {
         List<CommandRecord> list = new ArrayList<>();
         String array = extractCommandsArray(json);
@@ -69,6 +72,7 @@ public class GameLoadService {
         return list;
     }
 
+    // find and return the commands json array
     private String extractCommandsArray(String json) {
         int idx = json.indexOf('"' + GameSaveService.FIELD_COMMANDS + '"');
         if (idx == -1) return "[]";
@@ -83,6 +87,7 @@ public class GameLoadService {
         return "[]";
     }
 
+    // parse one json block into a command record
     private CommandRecord parseRecord(String block) {
         return new CommandRecord(
                 extractString(block, GameSaveService.FIELD_TYPE),
@@ -91,6 +96,7 @@ public class GameLoadService {
                 extractInt(block, GameSaveService.FIELD_COL));
     }
 
+    // read int field from top-level json
     private int extractTopLevelInt(String json, String key) {
         int commandsStart = json.indexOf('"' + GameSaveService.FIELD_COMMANDS + '"');
         String topLevel = commandsStart > 0 ? json.substring(0, commandsStart) : json;
@@ -104,6 +110,7 @@ public class GameLoadService {
         return start == end ? 0 : Integer.parseInt(topLevel.substring(start, end));
     }
 
+    // extract string value for a json key
     private String extractString(String json, String key) {
         String search = "\"" + key + "\":\"";
         int idx = json.indexOf(search);
@@ -113,6 +120,7 @@ public class GameLoadService {
         return end == -1 ? null : json.substring(start, end);
     }
 
+    // extract int value for a json key
     private int extractInt(String json, String key) {
         String search = "\"" + key + "\":";
         int idx = json.indexOf(search);

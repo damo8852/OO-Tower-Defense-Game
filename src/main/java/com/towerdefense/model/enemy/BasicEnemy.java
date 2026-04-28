@@ -15,6 +15,7 @@ public class BasicEnemy extends Enemy {
         super(path, BASE_HEALTH + (wave - 1) * HEALTH_PER_WAVE, MOVE_SPEED, KILL_REWARD, wave);
     }
 
+    // return type name
     @Override
     public String getTypeName() { return "BASIC"; }
 }

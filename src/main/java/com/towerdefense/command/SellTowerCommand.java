@@ -16,18 +16,21 @@ public class SellTowerCommand implements GameCommand {
         this.tower = tower;
     }
 
+    // remove tower and add sell value to gold
     @Override
     public void execute() {
         engine.removeTower(tower);
         gameState.addGold(tower.getSellValue());
     }
 
+    // re-place tower and take back sell value
     @Override
     public void undo() {
         engine.addTower(tower);
         gameState.spendGold(tower.getSellValue());
     }
 
+    // return command record for save/load
     @Override
     public CommandRecord toRecord() {
         return new CommandRecord(CommandRecord.TYPE_SELL, null,

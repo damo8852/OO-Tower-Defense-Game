@@ -28,6 +28,7 @@ public class TowerSelectionPanel extends VBox {
         addButton(TowerType.SPLASH, "Splash Tower [X]");
     }
 
+    // add toggle button for tower type
     private void addButton(TowerType type, String displayName) {
         String label = displayName + " (" + type.getCost() + "g)";
         ToggleButton btn = new ToggleButton(label);
@@ -37,6 +38,7 @@ public class TowerSelectionPanel extends VBox {
         getChildren().add(btn);
     }
 
+    // create tower from selected type, null if nothing selected
     public Tower createTower(Tile cell) {
         if (group.getSelectedToggle() == null) return null;
         TowerType type = typeMap.get((ToggleButton) group.getSelectedToggle());

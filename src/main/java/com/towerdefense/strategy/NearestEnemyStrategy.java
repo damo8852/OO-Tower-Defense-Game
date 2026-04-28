@@ -9,6 +9,7 @@ import java.util.List;
 
 public class NearestEnemyStrategy implements TargetingStrategy {
 
+    // pick alive enemy closest to the tower
     @Override
     public IEnemy select(List<IEnemy> inRange, Tile towerPosition) {
         return inRange.stream()

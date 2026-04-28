@@ -3,6 +3,7 @@ package com.towerdefense.ui;
 import com.towerdefense.eventbus.EventBus;
 import com.towerdefense.eventbus.EventType;
 import com.towerdefense.eventbus.ITowerDefenseObserver;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -26,9 +27,13 @@ public class HudView extends VBox implements ITowerDefenseObserver {
         for (Label l : new Label[]{livesLabel, scoreLabel, waveLabel, goldLabel})
             l.setStyle("-fx-text-fill: white;");
         getChildren().addAll(livesLabel, scoreLabel, waveLabel, goldLabel);
+    }
+
+    public void initialize() {
         EventBus.getInstance().attach(this);
     }
 
+    // receive event and update the matching hud label
     @Override
     public void update(EventType eventType, Object eventObject) {
         switch (eventType) {

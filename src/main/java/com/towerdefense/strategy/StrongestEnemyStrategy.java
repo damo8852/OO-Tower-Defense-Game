@@ -9,6 +9,7 @@ import java.util.List;
 
 public class StrongestEnemyStrategy implements TargetingStrategy {
 
+    // pick alive enemy with most health
     @Override
     public IEnemy select(List<IEnemy> inRange, Tile towerPosition) {
         return inRange.stream()

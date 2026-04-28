@@ -10,31 +10,35 @@ import com.towerdefense.strategy.FirstInPathStrategy;
 
 public class SplashTower extends Tower {
 
-    private static final int ATTACK_RANGE  = 2;
+    private static final int ATTACK_RANGE = 2;
     private static final int ATTACK_DAMAGE = 10;
 
     public SplashTower(Tile position) {
         super(position, new FirstInPathStrategy(), ATTACK_RANGE, ATTACK_DAMAGE, TowerType.SPLASH.getCost());
     }
 
+    // damage all enemies in range at once
     @Override
     public void attack(List<IEnemy> enemies) {
         enemiesInRange(enemies).forEach(e -> e.takeDamage(getDamage()));
     }
 
+    // deferred aoe attack on all enemies in range
     @Override
     public Runnable planAttack(List<IEnemy> enemies) {
         List<IEnemy> targets = enemiesInRange(enemies);
         return () -> targets.forEach(e -> e.takeDamage(getDamage()));
     }
 
+    // return one shot per enemy hit
     @Override
     public List<TowerShot> collectShots(List<IEnemy> enemies) {
         return enemiesInRange(enemies).stream()
-                .map(e -> new TowerShot(getPosition(), e.getPosition(), getTowerType()))
-                .toList();
+            .map(e -> new TowerShot(getPosition(), e.getPosition(), getTowerType()))
+            .toList();
     }
 
+    // return tower type
     @Override
     public TowerType getTowerType() { return TowerType.SPLASH; }
 }

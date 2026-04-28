@@ -28,13 +28,13 @@ import javafx.scene.text.FontWeight;
 
 public class MapGridView extends Canvas {
 
-    private static final int    DEFAULT_TILE_SIZE    = 50;
-    private static final int    MIN_TILE_SIZE        = 20;
-    private static final String FONT_NAME            = "Arial";
-    private static final double GRID_STROKE_ALPHA    = 0.35;
+    private static final int DEFAULT_TILE_SIZE = 50;
+    private static final int MIN_TILE_SIZE = 20;
+    private static final String FONT_NAME = "Arial";
+    private static final double GRID_STROKE_ALPHA = 0.35;
     private static final long   PROJECTILE_TRAVEL_NS = 280_000_000L;
 
-    private static final Color COLOR_PATH  = Color.SANDYBROWN;
+    private static final Color COLOR_PATH = Color.SANDYBROWN;
     private static final Color COLOR_EMPTY = Color.color(0.18, 0.38, 0.18);
     private static final Color COLOR_HP_BG = Color.DARKRED;
     private static final Color COLOR_HP_FG = Color.LIMEGREEN;
@@ -59,17 +59,29 @@ public class MapGridView extends Canvas {
     );
     private int tileSize = DEFAULT_TILE_SIZE;
 
+    // tower label font size
     private int    labelSize()   { return tileSize * 16 / DEFAULT_TILE_SIZE; }
+    // tower stats font size
     private int    statsSize()   { return tileSize * 9  / DEFAULT_TILE_SIZE; }
+    // label horizontal offset
     private int    labelXOff()   { return tileSize * 17 / DEFAULT_TILE_SIZE; }
+    // label vertical offset
     private int    labelYOff()   { return tileSize * 28 / DEFAULT_TILE_SIZE; }
+    // stats horizontal offset
     private int    statsXOff()   { return tileSize * 4  / DEFAULT_TILE_SIZE; }
+    // stats vertical offset
     private int    statsYOff()   { return tileSize * 44 / DEFAULT_TILE_SIZE; }
+    // enemy circle inset
     private int    enemyInset()  { return tileSize * 8  / DEFAULT_TILE_SIZE; }
+    // enemy circle vertical offset
     private int    enemyYOff()   { return tileSize * 11 / DEFAULT_TILE_SIZE; }
+    // hp bar inset
     private int    hpBarInset()  { return Math.max(1, tileSize * 2 / DEFAULT_TILE_SIZE); }
+    // hp bar height
     private int    hpBarHeight() { return Math.max(2, tileSize * 5 / DEFAULT_TILE_SIZE); }
+    // shift for stacking enemies on same tile
     private int    stackXOff()   { return Math.max(1, tileSize * 8 / DEFAULT_TILE_SIZE); }
+    // projectile circle radius
     private double projRadius()  { return tileSize * 5.0 / DEFAULT_TILE_SIZE; }
 
     private final GameEngine engine;
@@ -88,8 +100,8 @@ public class MapGridView extends Canvas {
         this.commandHistory = commandHistory;
         this.selectionPanel = selectionPanel;
         setOnMouseClicked(this::handleClick);
-        refresh();
     }
+    // recalculate tile size to fit space and redraw
     @Override
     public void resize(double availW, double availH) {
         int cols = engine.getMap().getCols();
@@ -102,6 +114,7 @@ public class MapGridView extends Canvas {
         refresh();
     }
 
+    // drain shots, advance projectiles, redraw canvas
     public void refresh() {
         long now = System.nanoTime();
 
@@ -121,6 +134,7 @@ public class MapGridView extends Canvas {
         drawEnemies(gc);
     }
 
+    // convert shot record to animated projectile
     private Projectile toProjectile(TowerShot shot) {
         Color color = TOWER_COLORS.getOrDefault(shot.towerType(), Color.WHITE);
         return new Projectile(
@@ -129,9 +143,12 @@ public class MapGridView extends Canvas {
                 color);
     }
 
+    // return x center of tile
     private double tileCenterX(Tile t) { return t.getCol() * tileSize + tileSize / 2.0; }
+    // return y center of tile
     private double tileCenterY(Tile t) { return t.getRow() * tileSize + tileSize / 2.0; }
 
+    // draw all grid cells and towers
     private void drawGrid(GraphicsContext gc) {
         GameMap map = engine.getMap();
         for (int r = 0; r < map.getRows(); r++) {
@@ -145,6 +162,7 @@ public class MapGridView extends Canvas {
         }
     }
 
+    // fill and outline one tile, draw tower if present
     private void drawCell(GraphicsContext gc, int r, int c, Tile cell, Tower tower) {
         double x = (double) c * tileSize;
         double y = (double) r * tileSize;
@@ -156,6 +174,7 @@ public class MapGridView extends Canvas {
         if (tower != null) drawTower(gc, x, y, tower);
     }
 
+    // return fill color based on tile type
     private Color cellColor(Tile.Type type, Tower tower) {
         return switch (type) {
             case PATH  -> COLOR_PATH;
@@ -165,6 +184,7 @@ public class MapGridView extends Canvas {
         };
     }
 
+    // draw tower letter and stats in tile
     private void drawTower(GraphicsContext gc, double x, double y, Tower tower) {
         gc.setFill(COLOR_LABEL);
         gc.setFont(Font.font(FONT_NAME, FontWeight.BOLD, labelSize()));
@@ -175,6 +195,7 @@ public class MapGridView extends Canvas {
 
     //projectiles
 
+    // draw all active projectiles
     private void drawProjectiles(GraphicsContext gc) {
         double r = projRadius();
         for (Projectile p : projectiles) {
@@ -185,6 +206,7 @@ public class MapGridView extends Canvas {
 
     //enemies
 
+    // draw all enemies, stack if on same tile
     private void drawEnemies(GraphicsContext gc) {
         Map<Tile, Integer> countByTile = new HashMap<>();
         for (IEnemy e : engine.getActiveEnemies()) {
@@ -193,11 +215,13 @@ public class MapGridView extends Canvas {
         }
     }
 
+    // darken enemy color based on wave number
     private static Color waveColor(Color base, int wave) {
         double factor = Math.max(0.30, 1.0 - (wave - 1) * 0.15);
         return new Color(base.getRed() * factor, base.getGreen() * factor, base.getBlue() * factor, 1.0);
     }
 
+    // draw enemy circle with hp bar
     private void drawEnemy(GraphicsContext gc, IEnemy e, double xShift) {
         Tile pos = e.getPosition();
         double x = pos.getCol() * tileSize + xShift;
@@ -216,6 +240,7 @@ public class MapGridView extends Canvas {
         gc.fillOval(x + ei, y + enemyYOff(), tileSize - ei * 2, tileSize - ei * 2);
     }
 
+    // find clicked tile and dispatch to handler
     private void handleClick(MouseEvent event) {
         int col = (int) (event.getX() / tileSize);
         int row = (int) (event.getY() / tileSize);
@@ -230,6 +255,7 @@ public class MapGridView extends Canvas {
         }
     }
 
+    // route left click to place or upgrade
     private void handlePrimaryClick(Tile cell, int row, int col) {
         switch (cell.getType()) {
             case EMPTY -> placeTower(cell);
@@ -238,6 +264,7 @@ public class MapGridView extends Canvas {
         }
     }
 
+    // place tower if player has enough gold
     private void placeTower(Tile cell) {
         Tower tower = selectionPanel.createTower(cell);
         if (tower == null || gameState.getGold() < tower.getCost()) return;
@@ -245,6 +272,7 @@ public class MapGridView extends Canvas {
         refresh();
     }
 
+    // upgrade tower if player has enough gold
     private void upgradeTower(int row, int col) {
         if (gameState.getGold() < UpgradeTowerCommand.UPGRADE_COST) return;
         engine.getTowerAt(row, col).ifPresent(t -> {
@@ -253,6 +281,7 @@ public class MapGridView extends Canvas {
         });
     }
 
+    // sell tower at given cell
     private void sellTower(int row, int col) {
         engine.getTowerAt(row, col).ifPresent(t -> {
             commandHistory.execute(new SellTowerCommand(engine, gameState, t));

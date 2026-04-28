@@ -7,5 +7,6 @@ public enum TowerType {
 
     TowerType(int cost) { this.cost = cost; }
 
+    // return placement cost
     public int getCost() { return cost; }
 }

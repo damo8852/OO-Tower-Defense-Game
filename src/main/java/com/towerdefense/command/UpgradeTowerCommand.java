@@ -17,18 +17,21 @@ public class UpgradeTowerCommand implements GameCommand {
         this.gameState = gameState;
     }
 
+    // boost tower stats and spend upgrade cost
     @Override
     public void execute() {
         tower.upgrade(DAMAGE_INCREASE, RANGE_INCREASE);
         gameState.spendGold(UPGRADE_COST);
     }
 
+    // reverse stat boost and refund upgrade cost
     @Override
     public void undo() {
         tower.downgrade(DAMAGE_INCREASE, RANGE_INCREASE);
         gameState.addGold(UPGRADE_COST);
     }
 
+    // return command record for save/load
     @Override
     public CommandRecord toRecord() {
         return new CommandRecord(CommandRecord.TYPE_UPGRADE, null,

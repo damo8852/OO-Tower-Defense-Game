@@ -16,6 +16,7 @@ public class WaveSpawner {
         this.factories = factories;
     }
 
+    // generate enemy list for the wave, count scales with wave number
     public List<IEnemy> spawnWave(int waveNumber, List<Tile> path) {
         List<IEnemy> enemies = new ArrayList<>();
         int count = DEFAULT_ENEMY_COUNT + (waveNumber - 1) * ENEMIES_PER_WAVE_INCREMENT;
@@ -25,6 +26,7 @@ public class WaveSpawner {
         return enemies;
     }
 
+    // pick factory by cycling through available types
     private EnemyFactory pickFactory(int waveNumber, int enemyIndex) {
         int availableTypes = Math.min(waveNumber, factories.size());
         return factories.get(enemyIndex % availableTypes);

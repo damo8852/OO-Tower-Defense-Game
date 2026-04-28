@@ -9,6 +9,7 @@ import java.util.List;
 
 public class FirstInPathStrategy implements TargetingStrategy {
 
+    // pick alive enemy furthest along the path
     @Override
     public IEnemy select(List<IEnemy> inRange, Tile towerPosition) {
         return inRange.stream()

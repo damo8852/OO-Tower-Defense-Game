@@ -16,11 +16,13 @@ public class ArmoredEnemy extends Enemy {
         super(path, BASE_HEALTH + (wave - 1) * HEALTH_PER_WAVE, MOVE_SPEED, KILL_REWARD, wave);
     }
 
+    // halve damage before applying - armor mechanic
     @Override
     public void takeDamage(int damage) {
         super.takeDamage(damage / ARMOR_DIVISOR);
     }
 
+    // return type name
     @Override
     public String getTypeName() { return "ARMORED"; }
 }

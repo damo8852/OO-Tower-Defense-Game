@@ -16,13 +16,17 @@ class Projectile {
         this.color = color;
     }
 
+    // advance progress by fraction
     void advance(double fraction) {
         progress = Math.min(1.0, progress + fraction);
     }
 
+    // true when reached target
     boolean isDone() { return progress >= 1.0; }
 
+    // return current x position
     double x() { return fromX + (toX - fromX) * progress; }
+    // return current y position
     double y() { return fromY + (toY - fromY) * progress; }
 }
 

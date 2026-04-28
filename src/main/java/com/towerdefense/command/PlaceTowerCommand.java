@@ -16,18 +16,21 @@ public class PlaceTowerCommand implements GameCommand {
         this.tower = tower;
     }
 
+    // place tower and spend gold
     @Override
     public void execute() {
         engine.addTower(tower);
         gameState.spendGold(tower.getCost());
     }
 
+    // remove tower and refund cost
     @Override
     public void undo() {
         engine.removeTower(tower);
         gameState.addGold(tower.getCost());
     }
 
+    // return command record for save/load
     @Override
     public CommandRecord toRecord() {
         return new CommandRecord(CommandRecord.TYPE_PLACE, tower.getTowerType().name(),

@@ -14,14 +14,19 @@ public class Tile {
         this.type = type;
     }
 
+    // return euclidean distance to another tile
     public double distanceTo(Tile other) {
         int dr = this.row - other.row;
         int dc = this.col - other.col;
         return Math.sqrt(dr * dr + dc * dc);
     }
 
+    // return row
     public int getRow() { return row; }
+    // return column
     public int getCol() { return col; }
+    // return tile type
     public Type getType() { return type; }
+    // set tile type
     void setType(Type type) { this.type = type; }
 }
