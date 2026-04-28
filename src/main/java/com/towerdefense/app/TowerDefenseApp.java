@@ -161,10 +161,11 @@ public class TowerDefenseApp extends Application {
         waveRunning = false;
 
         hudView = new HudView(DEFAULT_LIVES, 0, 0, DEFAULT_GOLD);
+        hudView.initialize();
         TowerSelectionPanel selectionPanel = new TowerSelectionPanel();
         mapGridView = new MapGridView(engine, gameState, commandHistory, selectionPanel);
 
-        statusLabel    = new Label("Press Start Wave to begin.");
+        statusLabel = new Label("Press Start Wave to begin.");
         statusLabel.setStyle("-fx-text-fill: white;");
         gameOverOverlay = buildGameOverOverlay();
 
